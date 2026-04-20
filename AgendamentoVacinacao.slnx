@@ -3,5 +3,5 @@
   <Project Path="AgendamentoVacinacao.Business/AgendamentoVacinacao.Business.csproj" />
   <Project Path="AgendamentoVacinacao.Entity/AgendamentoVacinacao.Entity.csproj" />
   <Project Path="AgendamentoVacinacao.Repository/AgendamentoVacinacao.Repository.csproj" />
-  <Project Path="Validators/Validators.csproj" />
+  <Project Path="Validators/AgendamentoVacinacao.Validators.csproj" />
 </Solution>

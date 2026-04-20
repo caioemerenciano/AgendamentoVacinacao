@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace AgendamentoVacinacao.Entity.Entities;
 
-namespace AgendamentoVacinacao.Entity.Entities
+public class Agendamento
 {
-    internal class Agendamento
-    {
-    }
+
 }
