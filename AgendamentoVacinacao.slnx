@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="AgendamentoVacinacao.Api/AgendamentoVacinacao.WebApi.csproj" />
+  <Project Path="AgendamentoVacinacao.Business.Interface/AgendamentoVacinacao.Business.Interface.csproj" Id="1547a95c-6cf7-42ea-ae34-e13ca99b6ebb" />
   <Project Path="AgendamentoVacinacao.Business/AgendamentoVacinacao.Business.csproj" />
   <Project Path="AgendamentoVacinacao.Entity/AgendamentoVacinacao.Entity.csproj" />
   <Project Path="AgendamentoVacinacao.Repository.Interface/AgendamentoVacinacao.Repository.Interface.csproj" Id="0a197c2e-0ea7-4323-97d2-d34953f1b654" />
