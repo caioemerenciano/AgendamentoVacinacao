@@ -4,7 +4,7 @@ public class Paciente
 {
     protected Paciente() { }
 
-    public Paciente(Guid id, string nome, DateOnly dataNascimento)
+    public Paciente(Guid id, string nome, DateTime dataNascimento)
     {
         Nome = nome;
         DataNascimento = dataNascimento;
