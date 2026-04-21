@@ -4,5 +4,5 @@
   <Project Path="AgendamentoVacinacao.Entity/AgendamentoVacinacao.Entity.csproj" />
   <Project Path="AgendamentoVacinacao.Repository.Interface/AgendamentoVacinacao.Repository.Interface.csproj" Id="0a197c2e-0ea7-4323-97d2-d34953f1b654" />
   <Project Path="AgendamentoVacinacao.Repository/AgendamentoVacinacao.Repository.csproj" />
-  <Project Path="Validators/AgendamentoVacinacao.Validators.csproj" />
+  <Project Path="Validators/AgendamentoVacinacao.Validator.csproj" />
 </Solution>
