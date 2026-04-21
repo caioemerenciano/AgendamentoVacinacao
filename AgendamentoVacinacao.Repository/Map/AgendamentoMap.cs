@@ -31,8 +31,10 @@ public class AgendamentoMap : IEntityTypeConfiguration<Agendamento>
 
         builder.Property(a => a.Status)
             .HasColumnName("dsc_status")
-            .HasMaxLength(50).IsRequired()
-            .IsUnicode(false);
+            .HasMaxLength(50)
+            .IsRequired()
+            .IsUnicode(false)
+            .HasConversion<string>();
 
         builder.Property(a => a.DataCriacao)
             .HasColumnName("dat_criacao")
