@@ -14,19 +14,20 @@ public class PacienteRepository : IPacienteRepository
         _context = context;
     }
 
-    public async Task<bool> ExistePacienteAsync(string nome, DateTime dataNascimento)
-    {
-        return await _context.Pacientes
-            .AnyAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
-    }
+    public async Task<bool> ExistePacienteAsync(string nome, DateTime dataNascimento) =>
+         await _context.Pacientes.AnyAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
+    
+    public async Task<IEnumerable<Paciente>> ObterTodosAsync() =>
+        await _context.Pacientes.AsNoTracking().ToListAsync();
 
-    public async Task AdicionarAsync(Paciente paciente)
-    {
+    public async Task<Paciente?> ObterPorIdAsync(int id) =>
+        await _context.Pacientes.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+
+
+    public async Task AdicionarAsync(Paciente paciente) =>
         await _context.Pacientes.AddAsync(paciente);
-    }
 
-    public async Task SalvarAlteracoesAsync()
-    {
+    public async Task SalvarAlteracoesAsync() =>
         await _context.SaveChangesAsync();
-    }
+    
 }

@@ -14,18 +14,21 @@ public class AgendamentoRepository : IAgendamentoRepository
     {
         _context = context;
     }
-
     public async Task<int> ContarAgendamentosPorDiaAsync(DateTime data)
     {
         return await _context.Agendamentos
             .CountAsync(a => a.DataAgendamento.Date == data.Date);
     }
-
     public async Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora)
     {
         return await _context.Agendamentos
             .CountAsync(a => a.DataAgendamento == data && a.HoraAgendamento == hora);
     }
+    public async Task<IEnumerable<Agendamento>> ObterTodosAsync() =>
+        await _context.Agendamentos
+            .Include(a => a.Paciente)
+            .AsNoTracking()
+            .ToListAsync();
 
 
     public async Task AdicionarAsync(Agendamento agendamento)

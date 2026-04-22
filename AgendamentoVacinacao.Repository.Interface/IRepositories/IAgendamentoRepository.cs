@@ -6,6 +6,8 @@ public interface IAgendamentoRepository
 {
     Task<int> ContarAgendamentosPorDiaAsync(DateTime data);
     Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora);
+    Task<IEnumerable<Agendamento>> ObterTodosAsync();
+
 
     Task AdicionarAsync(Agendamento agendamento);
     Task SalvarAlteracoesAsync();
