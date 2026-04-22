@@ -3,7 +3,7 @@ using AgendamentoVacinacao.Repository.Interface;
 using AgendamentoVacinacao.Entity.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Agendamento.Repository.Repositories;
+namespace AgendamentoVacinacao.Repository.Repositories;
 
 public class PacienteRepository : IPacienteRepository
 {
@@ -17,7 +17,7 @@ public class PacienteRepository : IPacienteRepository
     public async Task<bool> ExistePacienteAsync(string nome, DateTime dataNascimento)
     {
         return await _context.Pacientes
-            .AnyAsync(p => p.Nome.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
+            .AnyAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
     }
 
     public async Task AdicionarAsync(Paciente paciente)

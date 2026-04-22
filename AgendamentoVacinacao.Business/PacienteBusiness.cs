@@ -6,11 +6,11 @@ using AgendamentoVacinacao.Entity.Entities;
 
 namespace Agendamento.Business.Services;
 
-public class PacienteService : IPacienteService
+public class PacienteBusiness : IPacienteBusiness
 {
     private readonly IPacienteRepository _repository;
 
-    public PacienteService(IPacienteRepository repository)
+    public PacienteBusiness(IPacienteRepository repository)
     {
         _repository = repository;
     }

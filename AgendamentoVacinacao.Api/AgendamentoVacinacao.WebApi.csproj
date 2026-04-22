@@ -11,8 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="Configuration\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AgendamentoVacinacao.Business.Interface\AgendamentoVacinacao.Business.Interface.csproj" />
+    <ProjectReference Include="..\AgendamentoVacinacao.Entity\AgendamentoVacinacao.Entity.csproj" />
   </ItemGroup>
 
 </Project>
