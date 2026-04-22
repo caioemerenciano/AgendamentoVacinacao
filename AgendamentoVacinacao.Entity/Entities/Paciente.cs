@@ -4,15 +4,15 @@ public class Paciente
 {
     protected Paciente() { }
 
-    public Paciente(Guid id, string nome, DateTime dataNascimento)
+    public Paciente(string nome, DateTime dataNascimento)
     {
         Nome = nome;
         DataNascimento = dataNascimento;
         DataCriacao = DateTime.Now;
     }
 
-    public Guid Id { get; private set; }
-    public string Nome { get; private set; }
+    public int Id { get; private set; }
+    public string? Nome { get; private set; }
     public DateTime DataNascimento { get; private set; }
     public DateTime DataCriacao { get; private set; }
 

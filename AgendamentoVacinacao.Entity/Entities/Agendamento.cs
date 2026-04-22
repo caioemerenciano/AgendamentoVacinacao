@@ -6,7 +6,7 @@ public class Agendamento
 {
     protected Agendamento() { }
 
-    public Agendamento(Guid id, Guid idPaciente, DateTime dataAgendamento, TimeSpan horaAgendamento, StatusAgendamento status)
+    public Agendamento(int id, int idPaciente, DateTime dataAgendamento, TimeSpan horaAgendamento, StatusAgendamento status)
     {
         Id = id;
         IdPaciente = idPaciente;
@@ -16,8 +16,8 @@ public class Agendamento
         DataCriacao = DateTime.Now; 
     }
 
-    public Guid Id { get; private set; }
-    public Guid IdPaciente { get; private set; }
+    public int Id { get; private set; }
+    public int IdPaciente { get; private set; }
     public DateTime DataAgendamento { get; private set; }
     public TimeSpan HoraAgendamento { get; private set; }
     public StatusAgendamento Status { get; private set; }
