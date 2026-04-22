@@ -3,7 +3,7 @@ using AgendamentoVacinacao.Entity.DTOs.Response;
 
 namespace AgendamentoVacinacao.Business.Interface;
 
-public interface IPacienteBusiness
+public interface IPacienteService
 {
-    Task<AgendamentoResponse> CriarAgendamentoAsync(CriarPacienteRequest request);
+    Task<PacienteResponse> CriarPacienteAsync(CriarPacienteRequest request);
 }
