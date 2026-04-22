@@ -20,29 +20,26 @@ public class AgendamentoMap : IEntityTypeConfiguration<Agendamento>
             .HasColumnName("id_paciente")
             .IsRequired();
 
-        builder.Property(a => a.DataAgendamento).HasColumnName("dat_agendamento")
-            .HasColumnType("date")
+        builder.Property(a => a.DataAgendamento)
+            .HasColumnName("dat_agendamento")
             .IsRequired();
 
         builder.Property(a => a.HoraAgendamento)
             .HasColumnName("hor_agendamento")
-            .HasColumnType("time")
             .IsRequired();
 
         builder.Property(a => a.Status)
             .HasColumnName("dsc_status")
+            .HasConversion<string>() 
             .HasMaxLength(50)
-            .IsRequired()
-            .IsUnicode(false)
-            .HasConversion<string>();
+            .IsRequired();
 
         builder.Property(a => a.DataCriacao)
             .HasColumnName("dat_criacao")
-            .HasColumnType("datetime").IsRequired();
+            .IsRequired();
 
         builder.HasOne(a => a.Paciente)
-               .WithMany(p => p.Agendamentos)
-               .HasForeignKey(a => a.IdPaciente)
-               .HasConstraintName("fk_agendamento_paciente");
+            .WithMany(p => p.Agendamentos)
+            .HasForeignKey(a => a.IdPaciente);
     }
 }

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
@@ -17,6 +18,8 @@
   <ItemGroup>
     <ProjectReference Include="..\AgendamentoVacinacao.Business.Interface\AgendamentoVacinacao.Business.Interface.csproj" />
     <ProjectReference Include="..\AgendamentoVacinacao.Entity\AgendamentoVacinacao.Entity.csproj" />
+    <ProjectReference Include="..\AgendamentoVacinacao.Repository\AgendamentoVacinacao.Repository.csproj" />
+    <ProjectReference Include="..\AgendamentoVacinacao.Business\AgendamentoVacinacao.Business.csproj" />
   </ItemGroup>
 
 </Project>

@@ -11,15 +11,22 @@ public class PacienteMap : IEntityTypeConfiguration<Paciente>
         builder.ToTable("tb_paciente");
 
         builder.HasKey(p => p.Id);
-        builder.Property(p => p.Id).HasColumnName("id");
+
+        builder.Property(p => p.Id)
+            .HasColumnName("id_paciente")
+            .UseIdentityColumn();
 
         builder.Property(p => p.Nome)
             .HasColumnName("dsc_nome")
-            .IsRequired()
-            .HasMaxLength(150);
+            .HasMaxLength(255)
+            .IsRequired();
 
         builder.Property(p => p.DataNascimento)
             .HasColumnName("dat_nascimento")
+            .IsRequired();
+
+        builder.Property(p => p.DataCriacao)
+            .HasColumnName("dat_criacao")
             .IsRequired();
     }
 }

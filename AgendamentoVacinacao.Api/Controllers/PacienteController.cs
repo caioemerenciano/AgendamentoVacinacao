@@ -15,6 +15,7 @@ public class PacienteController : ControllerBase
         _pacienteBusiness = pacienteBusiness;
     }
 
+    [HttpPost]
     public async Task<IActionResult> CriarPaciente([FromBody] CriarPacienteRequest request)
     {
         var response = await _pacienteBusiness.CriarPacienteAsync(request);

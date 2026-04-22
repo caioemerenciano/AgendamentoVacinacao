@@ -4,7 +4,7 @@ using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.DTOs.Response;
 using AgendamentoVacinacao.Entity.Entities;
 
-namespace Agendamento.Business.Services;
+namespace AgendamentoVacinacao.Business.Services;
 
 public class PacienteBusiness : IPacienteBusiness
 {
