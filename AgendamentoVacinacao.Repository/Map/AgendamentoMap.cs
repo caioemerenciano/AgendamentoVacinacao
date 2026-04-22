@@ -14,7 +14,7 @@ public class AgendamentoMap : IEntityTypeConfiguration<Agendamento>
 
         builder.Property(a => a.Id)
             .HasColumnName("id_agendamento")
-            .ValueGeneratedNever();
+            .UseIdentityColumn();
 
         builder.Property(a => a.IdPaciente)
             .HasColumnName("id_paciente")

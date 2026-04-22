@@ -21,10 +21,10 @@ public class AgendamentoRepository : IAgendamentoRepository
             .CountAsync(a => a.DataAgendamento.Date == data.Date);
     }
 
-    public async Task<int> ContarAgendamentosPorHorarioAsync(DateTime dataHoraExata)
+    public async Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora)
     {
         return await _context.Agendamentos
-            .CountAsync(a => a.DataAgendamento == dataHoraExata);
+            .CountAsync(a => a.DataAgendamento == data && a.HoraAgendamento == hora);
     }
 
 
