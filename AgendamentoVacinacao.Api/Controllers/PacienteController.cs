@@ -19,7 +19,20 @@ public class PacienteController : ControllerBase
     public async Task<IActionResult> CriarPaciente([FromBody] CriarPacienteRequest request)
     {
         var response = await _pacienteBusiness.CriarPacienteAsync(request);
-
         return Created(string.Empty, response);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var pacientes = await _pacienteBusiness.ObterTodosAsync();
+        return Ok(pacientes);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var paciente = await _pacienteBusiness.ObterPorIdAsync(id);
+        return paciente == null ? NotFound() : Ok(paciente);
     }
 }

@@ -36,4 +36,31 @@ public class PacienteBusiness : IPacienteBusiness
             novoPaciente.Nome!,
             novoPaciente.DataNascimento);
     }
+
+    public async Task<IEnumerable<PacienteResponse>> ObterTodosAsync()
+    {
+        
+        var pacientes = await _repository.ObterTodosAsync();
+
+        return pacientes.Select(p => new PacienteResponse(
+            Id: p.Id,
+            Nome: p.Nome!,
+            DataNascimento: p.DataNascimento
+        ));
+    }
+    public async Task<PacienteResponse?> ObterPorIdAsync(int id)
+    {
+        
+        var paciente = await _repository.ObterPorIdAsync(id);
+
+        if (paciente == null)
+            return null;
+
+        return new PacienteResponse(
+            Id: paciente.Id,
+            Nome: paciente.Nome!,
+            DataNascimento: paciente.DataNascimento
+        );
+    }
+
 }
