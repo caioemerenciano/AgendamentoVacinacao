@@ -11,6 +11,7 @@ public class AgendamentoVacinacaoContext : DbContext
 
     public DbSet<Paciente> Pacientes { get; set; }
     public DbSet<Agendamento> Agendamentos { get; set; }
+    public DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

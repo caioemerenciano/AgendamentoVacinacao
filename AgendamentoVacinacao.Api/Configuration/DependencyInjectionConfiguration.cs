@@ -1,9 +1,8 @@
 ﻿using AgendamentoVacinacao.Business.Interface;
-using AgendamentoVacinacao.Repository.Interface;
 using AgendamentoVacinacao.Repository.Interface.IRepositories;
 using AgendamentoVacinacao.Repository.Repositories;
 using AgendamentoVacinacao.Business;
-using AgendamentoVacinacao.Business.Services;
+
 
 namespace AgendamentoVacinacao.WebApi.Configuration;
 
