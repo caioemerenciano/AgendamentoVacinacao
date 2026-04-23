@@ -4,7 +4,7 @@ namespace AgendamentoVacinacao.Entity.Entities;
 
 public class Agendamento
 {
-    protected Agendamento() { }
+    public Agendamento() { }
 
     public Agendamento(int id, int idPaciente, DateTime dataAgendamento, TimeSpan horaAgendamento, StatusAgendamento status)
     {
@@ -16,13 +16,13 @@ public class Agendamento
         DataCriacao = DateTime.Now; 
     }
 
-    public int Id { get; private set; }
-    public int IdPaciente { get; private set; }
+    public int Id { get; set; }
+    public int IdPaciente { get; set; }
     public DateTime DataAgendamento { get; set; }
     public TimeSpan HoraAgendamento { get; set; }
     public StatusAgendamento Status { get; set; }
-    public DateTime DataCriacao { get; private set; }
+    public DateTime DataCriacao { get; set; }
 
 
-    public virtual Paciente? Paciente { get; private set; }
+    public virtual Paciente? Paciente { get; set; }
 }

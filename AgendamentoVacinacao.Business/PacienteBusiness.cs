@@ -1,10 +1,10 @@
 ﻿using AgendamentoVacinacao.Business.Interface;
-using AgendamentoVacinacao.Repository.Interface;
+using AgendamentoVacinacao.Repository.Interface.IRepositories;
 using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.DTOs.Response;
 using AgendamentoVacinacao.Entity.Entities;
 
-namespace AgendamentoVacinacao.Business.Services;
+namespace AgendamentoVacinacao.Business;
 
 public class PacienteBusiness : IPacienteBusiness
 {

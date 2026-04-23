@@ -2,7 +2,7 @@
 
 public class Paciente
 {
-    protected Paciente() { }
+    public Paciente() { }
 
     public Paciente(string nome, DateTime dataNascimento)
     {
@@ -11,10 +11,10 @@ public class Paciente
         DataCriacao = DateTime.Now;
     }
 
-    public int Id { get; private set; }
-    public string? Nome { get; private set; }
-    public DateTime DataNascimento { get; private set; }
-    public DateTime DataCriacao { get; private set; }
+    public int Id { get; set; }
+    public string? Nome { get; set; }
+    public DateTime DataNascimento { get; set; }
+    public DateTime DataCriacao { get; set; }
 
     public virtual ICollection<Agendamento> Agendamentos { get; private set; } = new List<Agendamento>();
 }

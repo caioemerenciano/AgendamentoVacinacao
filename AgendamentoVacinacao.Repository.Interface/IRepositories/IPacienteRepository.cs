@@ -1,6 +1,6 @@
 ﻿using AgendamentoVacinacao.Entity.Entities;
 
-namespace AgendamentoVacinacao.Repository.Interface;
+namespace AgendamentoVacinacao.Repository.Interface.IRepositories;
 
 public interface IPacienteRepository
 {

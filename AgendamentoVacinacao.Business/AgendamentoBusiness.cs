@@ -119,9 +119,21 @@ public class AgendamentoBusiness : IAgendamentoBusiness
     }
 
 
-    public Task<AgendamentoResponse?> ObterPorIdAsync(int id)
+    public async Task<AgendamentoResponse?> ObterPorIdAsync(int id)
     {
-        throw new NotImplementedException("Método de busca a ser implementado futuramente.");
+        var agendamento = await _repository.ObterPorIdAsync(id);
+
+        if (agendamento == null)
+            return null!;
+
+        return new AgendamentoResponse(
+            Id: agendamento.Id,
+            IdPaciente: agendamento.IdPaciente,
+            NomePaciente: agendamento.Paciente?.Nome ?? string.Empty, 
+            DataAgendamento: agendamento.DataAgendamento,
+            HoraAgendamento: agendamento.HoraAgendamento,
+            Status: agendamento.Status
+        );
     }
     public async Task CancelarAgendamentoAsync(int id)
     {
@@ -146,4 +158,6 @@ public class AgendamentoBusiness : IAgendamentoBusiness
 
         await _repository.AtualizarAsync(agendamento);
     }
+
+
 }
