@@ -8,7 +8,10 @@ public class Usuario
     public string? Nome { get; set; } 
     public string? Email { get; set; } 
     public string? SenhaHash { get; set; } 
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
     public PerfilUsuario Perfil { get; set; }
+    
 
     public Usuario() { }
 
