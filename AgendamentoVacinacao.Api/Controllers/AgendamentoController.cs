@@ -41,4 +41,21 @@ public class AgendamentoController : ControllerBase
             return BadRequest(new { mensagem = ex.Message });
         }
     }
+
+    [HttpPatch("{id}/cancelar")]
+    public async Task<IActionResult> Cancelar(int id)
+    {
+        try
+        {
+            await _agendendamentoBusiness.CancelarAgendamentoAsync(id);
+
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+
 }

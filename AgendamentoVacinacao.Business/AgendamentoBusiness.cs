@@ -1,9 +1,9 @@
 ﻿using AgendamentoVacinacao.Business.Interface;
 using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.DTOs.Response;
-using AgendamentoVacinacao.Entity.Entities;
 using AgendamentoVacinacao.Entity.Enums;
 using AgendamentoVacinacao.Repository.Interface.IRepositories;
+using AgendamentoVacinacao.Entity.Extensions;
 
 
 namespace AgendamentoVacinacao.Business;
@@ -123,5 +123,27 @@ public class AgendamentoBusiness : IAgendamentoBusiness
     {
         throw new NotImplementedException("Método de busca a ser implementado futuramente.");
     }
+    public async Task CancelarAgendamentoAsync(int id)
+    {
+        var agendamento = await _repository.ObterPorIdAsync(id);
 
+        if (agendamento == null)
+        {
+            throw new InvalidOperationException("Agendamento não encontrado.");
+        }
+        if (agendamento.Status == StatusAgendamento.Cancelado)
+        {
+            throw new InvalidOperationException("Este agendamento já encontra-se cancelado.");
+        }
+
+        var dataHoraOriginal = agendamento.DataAgendamento.Date.Add(agendamento.HoraAgendamento);
+        if (dataHoraOriginal < DateTime.Now)
+        {
+            throw new InvalidOperationException("Não é possível cancelar um agendamento cuja data/hora já passou.");
+        }
+
+        agendamento.Cancelar();
+
+        await _repository.AtualizarAsync(agendamento);
+    }
 }

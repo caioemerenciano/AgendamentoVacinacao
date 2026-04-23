@@ -10,4 +10,5 @@ public interface IAgendamentoBusiness
     Task<AgendamentoResponse?> ObterPorIdAsync(int id);
     Task<IEnumerable<AgendamentoResponse>> ObterTodosAsync();
     Task<AgendamentoResponse> AtualizarAgendamentoAsync(int id, AtualizarAgendamentoRequest request);
+    Task CancelarAgendamentoAsync(int id);
 }
