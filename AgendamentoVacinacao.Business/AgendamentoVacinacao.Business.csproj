@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AgendamentoVacinacao.Business.Interface\AgendamentoVacinacao.Business.Interface.csproj" />
+    <ProjectReference Include="..\AgendamentoVacinacao.Repository.Interface\AgendamentoVacinacao.Repository.Interface.csproj" />
+  </ItemGroup>
+
 </Project>

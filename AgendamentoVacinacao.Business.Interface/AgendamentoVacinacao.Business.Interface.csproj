@@ -7,10 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Extensions\" />
-    <Folder Include="Fluent\" />
-    <Folder Include="Resources\" />
-    <Folder Include="Validators\" />
+    <ProjectReference Include="..\AgendamentoVacinacao.Entity\AgendamentoVacinacao.Entity.csproj" />
   </ItemGroup>
 
 </Project>
