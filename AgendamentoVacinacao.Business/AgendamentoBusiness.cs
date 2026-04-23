@@ -63,7 +63,60 @@ public class AgendamentoBusiness : IAgendamentoBusiness
             Status: a.Status
         ));
     }
+    public async Task<AgendamentoResponse> AtualizarAgendamentoAsync(int id, AtualizarAgendamentoRequest request)
+    {
+        var agendamento = await _repository.ObterPorIdAsync(id);
 
+        if (agendamento == null)
+        {
+            throw new InvalidOperationException("Agendamento não encontrado.");
+        }
+
+        var dataHoraOriginal = agendamento.DataAgendamento.Date.Add(agendamento.HoraAgendamento);
+        var limiteParaAlteracao = dataHoraOriginal.AddHours(-2);
+
+        if (DateTime.Now > limiteParaAlteracao)
+        {
+            throw new InvalidOperationException("Alteração só podem ser feitas com no mínimo 2 horas de antecedência do horário agendado.");
+        }
+
+        bool mudouDataOuHora = agendamento.DataAgendamento != request.DataAgendamento ||
+                               agendamento.HoraAgendamento != request.HoraAgendamento;
+
+        if (mudouDataOuHora)
+        {
+            var horarioOcupado = await _repository.ExisteAgendamentoConflitanteAsync(request.DataAgendamento, request.HoraAgendamento, id);
+            if (horarioOcupado)
+            {
+                throw new InvalidOperationException($"Já existe um paciente agendado para o dia {request.DataAgendamento:dd/MM/yyyy} às {request.HoraAgendamento:hh\\:mm}."); ;
+            }
+
+            if (agendamento.DataAgendamento != request.DataAgendamento)
+            {
+                const int LIMITE_VAGAS_POR_DIA = 20;
+                var totalNoDia = await _repository.ContarAgendamentosPorDiaAsync(request.DataAgendamento);
+
+                if (totalNoDia >= LIMITE_VAGAS_POR_DIA)
+                {
+                    throw new InvalidOperationException($"O limite máximo de {LIMITE_VAGAS_POR_DIA} vagas para o dia {request.DataAgendamento:dd/MM/yyyy} já foi atingido");
+                }
+            }
+        }
+
+        agendamento.DataAgendamento = request.DataAgendamento;
+        agendamento.HoraAgendamento = request.HoraAgendamento;
+
+        await _repository.AtualizarAsync(agendamento);
+        
+        return new AgendamentoResponse(
+            Id: agendamento.Id,
+            IdPaciente: agendamento.IdPaciente,
+            NomePaciente: agendamento.Paciente?.Nome ?? string.Empty,
+            DataAgendamento: agendamento.DataAgendamento,
+            HoraAgendamento: agendamento.HoraAgendamento,
+            Status: agendamento.Status
+        );
+    }
 
 
     public Task<AgendamentoResponse?> ObterPorIdAsync(int id)

@@ -18,8 +18,8 @@ public class Agendamento
 
     public int Id { get; private set; }
     public int IdPaciente { get; private set; }
-    public DateTime DataAgendamento { get; private set; }
-    public TimeSpan HoraAgendamento { get; private set; }
+    public DateTime DataAgendamento { get; set; }
+    public TimeSpan HoraAgendamento { get; set; }
     public StatusAgendamento Status { get; private set; }
     public DateTime DataCriacao { get; private set; }
 

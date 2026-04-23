@@ -22,9 +22,23 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> ObterTodos()
     {
         var agendamentos = await _agendendamentoBusiness.ObterTodosAsync();
         return Ok(agendamentos);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> Atualizar(int id, [FromBody] AtualizarAgendamentoRequest request)
+    {
+        try
+        {
+            var response = await _agendendamentoBusiness.AtualizarAgendamentoAsync(id, request);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 }
