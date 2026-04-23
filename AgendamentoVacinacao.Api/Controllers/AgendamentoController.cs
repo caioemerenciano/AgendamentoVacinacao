@@ -20,4 +20,11 @@ public class AgendamentoController : ControllerBase
 
         return Created(string.Empty, response);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var agendamentos = await _agendendamentoBusiness.ObterTodosAsync();
+        return Ok(agendamentos);
+    }
 }

@@ -50,6 +50,22 @@ public class AgendamentoBusiness : IAgendamentoBusiness
             Status: novoAgendamento.Status
         );
     }
+    public async Task<IEnumerable<AgendamentoResponse>> ObterTodosAsync()
+    {
+        var agendamentos = await _repository.ObterTodosAsync();
+
+        return agendamentos.Select(a => new AgendamentoResponse(
+            Id: a.Id,
+            IdPaciente: a.IdPaciente,
+            NomePaciente: a.Paciente!.Nome!,
+            DataAgendamento: a.DataAgendamento,
+            HoraAgendamento: a.HoraAgendamento,
+            Status: a.Status
+        ));
+    }
+
+
+
     public Task<AgendamentoResponse?> ObterPorIdAsync(int id)
     {
         throw new NotImplementedException("Método de busca a ser implementado futuramente.");

@@ -8,4 +8,5 @@ public interface IAgendamentoBusiness
 {
     Task<AgendamentoResponse> CriarAgendamentoAsync(CriarAgendamentoRequest request);
     Task<AgendamentoResponse?> ObterPorIdAsync(int id);
+    Task<IEnumerable<AgendamentoResponse>> ObterTodosAsync();
 }
