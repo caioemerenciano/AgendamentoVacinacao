@@ -12,6 +12,16 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddDbConfiguration(builder.Configuration);
 builder.Services.AddDependencyInjectionConfiguration();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirFrontendLocal", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") 
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,6 +34,8 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+app.UseCors("PermitirFrontendLocal");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
