@@ -1,5 +1,5 @@
 ﻿using AgendamentoVacinacao.Repository.Context;
-using AgendamentoVacinacao.Repository.Interface;
+using AgendamentoVacinacao.Repository.Interface.IRepositories;
 using AgendamentoVacinacao.Entity.Entities;
 using Microsoft.EntityFrameworkCore;
 

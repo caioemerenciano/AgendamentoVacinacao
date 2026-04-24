@@ -1,9 +1,9 @@
 ﻿using AgendamentoVacinacao.Business.Interface;
-using AgendamentoVacinacao.Repository.Interface;
 using AgendamentoVacinacao.Repository.Interface.IRepositories;
 using AgendamentoVacinacao.Repository.Repositories;
 using AgendamentoVacinacao.Business;
 using AgendamentoVacinacao.Business.Services;
+
 
 namespace AgendamentoVacinacao.WebApi.Configuration;
 
@@ -17,6 +17,9 @@ public static class DependencyInjectionConfiguration
  
         services.AddScoped<IPacienteBusiness, PacienteBusiness>();
         services.AddScoped<IAgendamentoBusiness, AgendamentoBusiness>();
+
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddScoped<IAuthBusiness, AuthBusiness>();
 
         return services;
     }

@@ -1,9 +1,11 @@
 ﻿using AgendamentoVacinacao.Business.Interface;
 using AgendamentoVacinacao.Entity.DTOs.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AgendamentoController : ControllerBase
 {
     private readonly IAgendamentoBusiness _agendendamentoBusiness;
@@ -14,6 +16,7 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Paciente")]
     public async Task<IActionResult> CriarAgendamento([FromBody] CriarAgendamentoRequest request)
     {
         var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request);
@@ -22,6 +25,7 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Enfermeiro")]
     public async Task<IActionResult> ObterTodos()
     {
         var agendamentos = await _agendendamentoBusiness.ObterTodosAsync();
@@ -43,6 +47,7 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpPatch("{id}/cancelar")]
+    [Authorize(Roles = "Paciente")]
     public async Task<IActionResult> Cancelar(int id)
     {
         try
