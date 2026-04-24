@@ -1,5 +1,6 @@
 ﻿using AgendamentoVacinacao.Business.Interface;
 using AgendamentoVacinacao.Entity.DTOs.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgendamentoVacinacao.WebApi.Controllers;
@@ -23,6 +24,7 @@ public class PacienteController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Enfermeiro")]
     public async Task<IActionResult> GetAll()
     {
         var pacientes = await _pacienteBusiness.ObterTodosAsync();

@@ -41,23 +41,10 @@ public class AuthController : ControllerBase
         {
             return Unauthorized(new { Erro = ex.Message });
         }
-    }
-
-    [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
-    {
-        try
-        {
-            var response = await _authBusiness.RefreshTokenAsync(request);
-            return Ok(response);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { Erro = ex.Message });
-        }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Erro = "Erro interno no servidor.", Detalhe = ex.Message });
+            return StatusCode(500, new { Erro = "Erro interno", Detalhe = ex.Message });
         }
     }
+    
 }
