@@ -1,0 +1,2 @@
+ALTER TABLE Usuarios ADD RefreshToken NVARCHAR(255) NULL;
+ALTER TABLE Usuarios ADD RefreshTokenExpiryTime DATETIME NULL;
