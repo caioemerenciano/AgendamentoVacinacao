@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Repository.Context;
+using AgendamentoVacinacao.Repository.Context;
 using AgendamentoVacinacao.Entity.Entities;
 using AgendamentoVacinacao.Repository.Interface.IRepositories;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +17,12 @@ public class AgendamentoRepository : IAgendamentoRepository
     public async Task<int> ContarAgendamentosPorDiaAsync(DateTime data) => 
         await _context.Agendamentos.CountAsync(a => a.DataAgendamento.Date == data);
     
-    public async Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora) => 
-        await _context.Agendamentos.CountAsync(a => a.DataAgendamento == data && a.HoraAgendamento == hora);
+    public async Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora)
+    {
+        var limiteInferior = hora.Subtract(TimeSpan.FromHours(1));
+        var limiteSuperior = hora.Add(TimeSpan.FromHours(1));
+        return await _context.Agendamentos.CountAsync(a => a.DataAgendamento == data && a.HoraAgendamento > limiteInferior && a.HoraAgendamento < limiteSuperior);
+    }
    
     public async Task<IEnumerable<Agendamento>> ObterTodosAsync() =>
         await _context.Agendamentos
@@ -39,9 +43,12 @@ public class AgendamentoRepository : IAgendamentoRepository
 
     public async Task<bool> ExisteAgendamentoConflitanteAsync(DateTime data, TimeSpan hora, int agendamentoIdIgnorado)
     {
+        var limiteInferior = hora.Subtract(TimeSpan.FromHours(1));
+        var limiteSuperior = hora.Add(TimeSpan.FromHours(1));
         return await _context.Agendamentos
             .AnyAsync(a => a.DataAgendamento == data
-                        && a.HoraAgendamento == hora
+                        && a.HoraAgendamento > limiteInferior
+                        && a.HoraAgendamento < limiteSuperior
                         && a.Id != agendamentoIdIgnorado);
     }
 
