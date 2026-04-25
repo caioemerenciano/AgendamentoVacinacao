@@ -1,4 +1,8 @@
-﻿namespace AgendamentoVacinacao.Entity.DTOs.Request;
+namespace AgendamentoVacinacao.Entity.DTOs.Request;
 
-public record CriarAgendamentoRequest(int IdPaciente, DateTime DataAgendamento, TimeSpan HoraAgendamento);
-
+public record CriarAgendamentoRequest(
+    string Nome,
+    string DataNascimento,
+    string DataAgendamento,
+    string Horario 
+);

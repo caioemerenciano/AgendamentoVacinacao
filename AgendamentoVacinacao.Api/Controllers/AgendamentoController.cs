@@ -1,11 +1,12 @@
-﻿using AgendamentoVacinacao.Business.Interface;
+using AgendamentoVacinacao.Business.Interface;
 using AgendamentoVacinacao.Entity.DTOs.Request;
+using AgendamentoVacinacao.Entity.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+//[Authorize]
 public class AgendamentoController : ControllerBase
 {
     private readonly IAgendamentoBusiness _agendendamentoBusiness;
@@ -16,16 +17,28 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Paciente")]
-    public async Task<IActionResult> CriarAgendamento([FromBody] CriarAgendamentoRequest request)
+    //[Authorize(Roles = "Paciente")]
+    public async Task<IActionResult> CriarAgendamento([FromBody] CriarAgendamentoRequest request, [FromServices] FluentValidation.IValidator<CriarAgendamentoRequest> validator)
     {
-        var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request);
+        var validationResult = await validator.ValidateAsync(request);
+        if (!validationResult.IsValid)  
+        {
+            return BadRequest(validationResult.Errors);
+        }
 
-        return Created(string.Empty, response);
+        try
+        {
+            var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request);
+            return Created(string.Empty, response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 
     [HttpGet]
-    [Authorize(Roles = "Enfermeiro")]
+    //[Authorize(Roles = "Enfermeiro")]
     public async Task<IActionResult> ObterTodos()
     {
         var agendamentos = await _agendendamentoBusiness.ObterTodosAsync();
@@ -47,7 +60,7 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpPatch("{id}/cancelar")]
-    [Authorize(Roles = "Paciente")]
+    //[Authorize(Roles = "Paciente")]
     public async Task<IActionResult> Cancelar(int id)
     {
         try
@@ -61,6 +74,19 @@ public class AgendamentoController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> AtualizarStatus(int id, [FromBody] AtualizarStatusRequest request)
+    {
+        try
+        {
+            await _agendendamentoBusiness.AtualizarStatusAsync(id, (StatusAgendamento)request.NovoStatus);
 
+            return Ok(new { mensagem = "Status atualizado com sucesso!" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
+    }
 
 }

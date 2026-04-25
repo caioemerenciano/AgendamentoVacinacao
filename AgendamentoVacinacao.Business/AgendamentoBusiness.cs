@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Business.Interface;
+using AgendamentoVacinacao.Business.Interface;
 using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.DTOs.Response;
 using AgendamentoVacinacao.Entity.Enums;
@@ -11,30 +11,48 @@ namespace AgendamentoVacinacao.Business;
 public class AgendamentoBusiness : IAgendamentoBusiness
 {
     private readonly IAgendamentoRepository _repository;
-    public AgendamentoBusiness(IAgendamentoRepository repository)
+    private readonly IPacienteRepository _pacienteRepository;
+    public AgendamentoBusiness(IAgendamentoRepository repository, IPacienteRepository pacienteRepository)
     {
         _repository = repository;
+        _pacienteRepository = pacienteRepository;
     }
 
     public async Task<AgendamentoResponse> CriarAgendamentoAsync(CriarAgendamentoRequest request)
     {
-        int agendamentosNoDia = await _repository.ContarAgendamentosPorDiaAsync(request.DataAgendamento);
+        string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "yyyy-MM-ddTHH:mm:ssZ", "yyyy-MM-ddTHH:mm:ss" };
+
+        var dataAgendamentoParsed = DateTime.ParseExact(request.DataAgendamento, formats, null, System.Globalization.DateTimeStyles.None);
+        var dataNascimentoParsed = DateTime.ParseExact(request.DataNascimento, formats, null, System.Globalization.DateTimeStyles.None);
+
+        var horaAgendamentoParsed = TimeSpan.Parse(request.Horario);
+
+        int agendamentosNoDia = await _repository.ContarAgendamentosPorDiaAsync(dataAgendamentoParsed);
         if (agendamentosNoDia > 20)
         {
             throw new InvalidOperationException("A capacidade máxima de 20 agendamentos para este dia foi atingida.");
         }
 
-        int agendamentosNoHorario = await _repository.ContarAgendamentosPorHorarioAsync(request.DataAgendamento ,request.HoraAgendamento);
+        int agendamentosNoHorario = await _repository.ContarAgendamentosPorHorarioAsync(dataAgendamentoParsed, horaAgendamentoParsed);
         if (agendamentosNoHorario >= 2)
         {
-            throw new InvalidOperationException("A capacidade máxima de 2 agendamentos para este horário foi atingida");
+            throw new InvalidOperationException("A capacidade máxima de 2 agendamentos simultâneos ou com intervalo menor que 1 hora foi atingida para este slot.");
+        }
+
+        var paciente = await _pacienteRepository.ObterPorNomeEDataNascimentoAsync(request.Nome, dataNascimentoParsed);
+
+        if (paciente == null)
+        {
+            paciente = new AgendamentoVacinacao.Entity.Entities.Paciente(request.Nome, dataNascimentoParsed);
+            await _pacienteRepository.AdicionarAsync(paciente);
+            await _pacienteRepository.SalvarAlteracoesAsync();
         }
 
         var novoAgendamento = new AgendamentoVacinacao.Entity.Entities.Agendamento(
             id: 0,
-            idPaciente: request.IdPaciente,
-            dataAgendamento: request.DataAgendamento,
-            horaAgendamento: request.HoraAgendamento,
+            idPaciente: paciente.Id,
+            dataAgendamento: dataAgendamentoParsed,
+            horaAgendamento: horaAgendamentoParsed,
             status: StatusAgendamento.Agendado
         );
 
@@ -44,7 +62,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
         return new AgendamentoResponse(
             Id: novoAgendamento.Id,
             IdPaciente: novoAgendamento.IdPaciente,
-            NomePaciente: "Nome omitido (Requer include de IPacienteRepository)",
+            NomePaciente: paciente.Nome ?? string.Empty,
             DataAgendamento: novoAgendamento.DataAgendamento,
             HoraAgendamento: novoAgendamento.HoraAgendamento,
             Status: novoAgendamento.Status
@@ -159,5 +177,17 @@ public class AgendamentoBusiness : IAgendamentoBusiness
         await _repository.AtualizarAsync(agendamento);
     }
 
+    public async Task AtualizarStatusAsync(int id, StatusAgendamento novoStatus)
+    {
+        var agendamento = await _repository.ObterPorIdAsync(id);
 
+        if (agendamento == null)
+        {
+            throw new InvalidOperationException("Agendamento não encontrado.");
+        }
+
+        agendamento.Status = novoStatus;
+
+        await _repository.AtualizarAsync(agendamento);
+    }
 }

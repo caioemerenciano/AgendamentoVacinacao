@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Business;
+using AgendamentoVacinacao.Business;
 using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.Entities;
 using AgendamentoVacinacao.Entity.Enums;
@@ -11,13 +11,15 @@ namespace AgendamentoVacinacao.Tests.Business;
 public class AgendamentoBusinessTests
 {
     private readonly Mock<IAgendamentoRepository> _agendamentoRepositoryMock;
+    private readonly Mock<IPacienteRepository> _pacienteRepositoryMock;
     private readonly AgendamentoBusiness _agendamentoBusiness;
 
     public AgendamentoBusinessTests()
     {
         _agendamentoRepositoryMock = new Mock<IAgendamentoRepository>();
+        _pacienteRepositoryMock = new Mock<IPacienteRepository>();
 
-        _agendamentoBusiness = new AgendamentoBusiness(_agendamentoRepositoryMock.Object);
+        _agendamentoBusiness = new AgendamentoBusiness(_agendamentoRepositoryMock.Object, _pacienteRepositoryMock.Object);
     }
 
     //Testes de método: CancelarAgendamentosAsync (PATCH)
@@ -176,17 +178,21 @@ public class AgendamentoBusinessTests
     [Fact]
     public async Task CriarAgendamentoAsync_ComDadosValidos_DeveSalvarNoRepositorio()
     {
-
+        var dataAgendamento = DateTime.Now.AddDays(1).Date;
         var request = new CriarAgendamentoRequest(
-            1,
-            DateTime.Now.AddDays(1).Date,
-            new TimeSpan(10, 0, 0)
+            "João Silva",
+            "15/05/1990",
+            dataAgendamento.ToString("dd/MM/yyyy"),
+            "10:00"
         );
 
-        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(request.DataAgendamento))
+        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(dataAgendamento))
             .ReturnsAsync(0);
-        _agendamentoRepositoryMock.Setup(repo => repo.ExisteAgendamentoConflitanteAsync(request.DataAgendamento, request.HoraAgendamento, 0))
-            .ReturnsAsync(false);
+        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorHorarioAsync(dataAgendamento, It.IsAny<TimeSpan>()))
+            .ReturnsAsync(0);
+        
+        _pacienteRepositoryMock.Setup(repo => repo.ObterPorNomeEDataNascimentoAsync(request.Nome, It.IsAny<DateTime>()))
+            .ReturnsAsync(new Paciente { Id = 1, Nome = "João Silva" });
 
         var resultado = await _agendamentoBusiness.CriarAgendamentoAsync(request);
 
@@ -194,7 +200,53 @@ public class AgendamentoBusinessTests
         _agendamentoRepositoryMock.Verify(repo => repo.AdicionarAsync(It.IsAny<Agendamento>()), Times.Once);
     }
 
-    // Teste de método: ObterTodosAsync (GET)
+    [Fact]
+    public async Task CriarAgendamentoAsync_ComDadosValidos_ISOFormat_DeveSalvarNoRepositorio()
+    {
+        var dataAgendamento = DateTime.Now.AddDays(1).Date;
+        var request = new CriarAgendamentoRequest(
+            "Maria Oliveira",
+            "1985-08-20",
+            dataAgendamento.ToString("yyyy-MM-dd"),
+            "14:00"
+        );
+
+        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(dataAgendamento))
+            .ReturnsAsync(0);
+        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorHorarioAsync(dataAgendamento, It.IsAny<TimeSpan>()))
+            .ReturnsAsync(0);
+        
+        _pacienteRepositoryMock.Setup(repo => repo.ObterPorNomeEDataNascimentoAsync(request.Nome, It.IsAny<DateTime>()))
+            .ReturnsAsync(new Paciente { Id = 2, Nome = "Maria Oliveira" });
+
+        var resultado = await _agendamentoBusiness.CriarAgendamentoAsync(request);
+
+        Assert.NotNull(resultado);
+        _agendamentoRepositoryMock.Verify(repo => repo.AdicionarAsync(It.IsAny<Agendamento>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CriarAgendamentoAsync_QuandoHoraEstaOcupadaComIntervaloMenorQueUmaHora_DeveLancarExcecao()
+    {
+        var dataAgendamento = DateTime.Now.AddDays(1).Date;
+        var request = new CriarAgendamentoRequest(
+            "Carlos Silva",
+            "1990-01-01",
+            dataAgendamento.ToString("yyyy-MM-dd"),
+            "14:30" // Tentando agendar 14:30, mas pode estar muito perto de outro
+        );
+
+        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(dataAgendamento))
+            .ReturnsAsync(5); // Um número aceitável pro dia
+        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorHorarioAsync(dataAgendamento, It.IsAny<TimeSpan>()))
+            .ReturnsAsync(2); // Retorna que o overlap é 2 (atingiu a margem de segurança de intervalo simultâneo)
+        
+        var excecao = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _agendamentoBusiness.CriarAgendamentoAsync(request));
+
+        Assert.Contains("capacidade máxima", excecao.Message);
+        Assert.Contains("intervalo menor que 1 hora", excecao.Message);
+    }
 
     [Fact]
     public async Task ObterTodosAsync_DeveRetornarListaDeAgendamentos()
