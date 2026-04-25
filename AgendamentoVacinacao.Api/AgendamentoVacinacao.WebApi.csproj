@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
@@ -17,6 +18,7 @@
     <ProjectReference Include="..\AgendamentoVacinacao.Entity\AgendamentoVacinacao.Entity.csproj" />
     <ProjectReference Include="..\AgendamentoVacinacao.Repository\AgendamentoVacinacao.Repository.csproj" />
     <ProjectReference Include="..\AgendamentoVacinacao.Business\AgendamentoVacinacao.Business.csproj" />
+    <ProjectReference Include="..\Validators\AgendamentoVacinacao.Validator.csproj" />
   </ItemGroup>
 
 </Project>
