@@ -3,6 +3,9 @@ using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace AgendamentoVacinacao.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -26,67 +29,69 @@ public class AgendamentoController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        try
-        {
-            var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request);
-            return Created(string.Empty, response);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { mensagem = ex.Message });
-        }
+        var usuarioId = GetUsuarioId();
+        var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request, usuarioId);
+        return Created(string.Empty, response);
     }
 
     [HttpGet]
-    [Authorize(Roles = "Paciente")]
-    public async Task<IActionResult> ObterTodos()
+    public async Task<IActionResult> ListarAgendamentos()
     {
-        var agendamentos = await _agendendamentoBusiness.ObterTodosAsync();
-        return Ok(agendamentos);
+        var usuarioId = GetUsuarioId();
+        var perfil = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        
+        var response = await _agendendamentoBusiness.ObterTodosAsync(usuarioId, perfil);
+        return Ok(response);
     }
 
-    [HttpPut]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> ObterPorId(int id)
+    {
+        var agendamento = await _agendendamentoBusiness.ObterPorIdAsync(id);
+        if (agendamento == null) return NotFound();
+        return Ok(agendamento);
+    }
+
+    [HttpPut("{id}")]
     public async Task<IActionResult> Atualizar(int id, [FromBody] AtualizarAgendamentoRequest request)
     {
-        try
-        {
-            var response = await _agendendamentoBusiness.AtualizarAgendamentoAsync(id, request);
-            return Ok(response);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { mensagem = ex.Message });
-        }
+        var usuarioId = GetUsuarioId();
+        var response = await _agendendamentoBusiness.AtualizarAgendamentoAsync(id, request, usuarioId);
+        return Ok(response);
     }
 
     [HttpPatch("{id}/cancelar")]
-    [Authorize(Roles = "Paciente")]
     public async Task<IActionResult> Cancelar(int id)
     {
-        try
-        {
-            await _agendendamentoBusiness.CancelarAgendamentoAsync(id);
-
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var usuarioId = GetUsuarioId();
+        var perfil = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        await _agendendamentoBusiness.CancelarAgendamentoAsync(id, usuarioId, perfil);
+        return NoContent();
     }
+
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> AtualizarStatus(int id, [FromBody] AtualizarStatusRequest request)
     {
-        try
-        {
-            await _agendendamentoBusiness.AtualizarStatusAsync(id, (StatusAgendamento)request.NovoStatus);
+        await _agendendamentoBusiness.AtualizarStatusAsync(id, (StatusAgendamento)request.NovoStatus);
+        return Ok(new { mensagem = "Status atualizado com sucesso!" });
+    }
 
-            return Ok(new { mensagem = "Status atualizado com sucesso!" });
-        }
-        catch (InvalidOperationException ex)
+    [HttpPatch("{id}/realizar")]
+    [Authorize(Roles = "Enfermeiro")]
+    public async Task<IActionResult> Realizar(int id)
+    {
+        await _agendendamentoBusiness.AtualizarStatusAsync(id, StatusAgendamento.Realizado);
+        return Ok(new { mensagem = "Agendamento realizado com sucesso!" });
+    }
+
+    private int GetUsuarioId()
+    {
+        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (idClaim == null || !int.TryParse(idClaim.Value, out int id))
         {
-            return BadRequest(new { mensagem = ex.Message });
+            throw new UnauthorizedAccessException("Usuário não identificado.");
         }
+        return id;
     }
 
 }

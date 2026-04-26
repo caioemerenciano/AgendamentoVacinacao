@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Entity.Enums;
+using AgendamentoVacinacao.Entity.Enums;
 
 namespace AgendamentoVacinacao.Entity.DTOs.Response;
 

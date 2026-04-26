@@ -30,7 +30,22 @@ public class PacienteRepository : IPacienteRepository
     public async Task AdicionarAsync(Paciente paciente) =>
         await _context.Pacientes.AddAsync(paciente);
 
+    public async Task AdicionarComIdForcadoAsync(Paciente paciente)
+    {
+        // Força o ID do paciente a ser o mesmo fornecido no objeto (que será o usuarioId)
+        // Isso é necessário para que a regra de posse (PacienteId == UsuarioId) funcione.
+        var sql = "SET IDENTITY_INSERT tb_paciente ON; " +
+                  "INSERT INTO tb_paciente (id_paciente, dsc_nome, dat_nascimento, dat_criacao) " +
+                  "VALUES ({0}, {1}, {2}, {3}); " +
+                  "SET IDENTITY_INSERT tb_paciente OFF;";
+        
+        await _context.Database.ExecuteSqlRawAsync(sql, 
+            paciente.Id, 
+            paciente.Nome ?? string.Empty, 
+            paciente.DataNascimento, 
+            paciente.DataCriacao);
+    }
+
     public async Task SalvarAlteracoesAsync() =>
         await _context.SaveChangesAsync();
-    
 }

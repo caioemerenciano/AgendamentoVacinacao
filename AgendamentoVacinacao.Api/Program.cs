@@ -1,4 +1,6 @@
 using AgendamentoVacinacao.WebApi.Configuration;
+using AgendamentoVacinacao.WebApi.Middleware;
+using AgendamentoVacinacao.Api.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+await DataSeeder.SeedEnfermeiroAsync(app.Services);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -35,7 +39,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors("PermitirFrontendLocal");

@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Entity.Entities;
+using AgendamentoVacinacao.Entity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

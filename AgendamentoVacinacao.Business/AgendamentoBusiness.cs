@@ -4,6 +4,7 @@ using AgendamentoVacinacao.Entity.DTOs.Response;
 using AgendamentoVacinacao.Entity.Enums;
 using AgendamentoVacinacao.Repository.Interface.IRepositories;
 using AgendamentoVacinacao.Entity.Extensions;
+using AgendamentoVacinacao.Entity.Entities;
 
 
 namespace AgendamentoVacinacao.Business;
@@ -18,14 +19,11 @@ public class AgendamentoBusiness : IAgendamentoBusiness
         _pacienteRepository = pacienteRepository;
     }
 
-    public async Task<AgendamentoResponse> CriarAgendamentoAsync(CriarAgendamentoRequest request)
+    public async Task<AgendamentoResponse> CriarAgendamentoAsync(CriarAgendamentoRequest request, int usuarioId)
     {
-        string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "yyyy-MM-ddTHH:mm:ssZ", "yyyy-MM-ddTHH:mm:ss" };
-
-        var dataAgendamentoParsed = DateTime.ParseExact(request.DataAgendamento, formats, null, System.Globalization.DateTimeStyles.None);
-        var dataNascimentoParsed = DateTime.ParseExact(request.DataNascimento, formats, null, System.Globalization.DateTimeStyles.None);
-
-        var horaAgendamentoParsed = TimeSpan.Parse(request.Horario);
+        var dataAgendamentoParsed = request.DataAgendamento;
+        var dataNascimentoParsed = request.DataNascimento;
+        var horaAgendamentoParsed = request.HoraAgendamento;
 
         int agendamentosNoDia = await _repository.ContarAgendamentosPorDiaAsync(dataAgendamentoParsed);
         if (agendamentosNoDia >= 20)
@@ -39,16 +37,17 @@ public class AgendamentoBusiness : IAgendamentoBusiness
             throw new InvalidOperationException("A capacidade máxima de 2 agendamentos simultâneos ou com intervalo menor que 1 hora foi atingida para este slot.");
         }
 
-        var paciente = await _pacienteRepository.ObterPorNomeEDataNascimentoAsync(request.Nome, dataNascimentoParsed);
+        var paciente = await _pacienteRepository.ObterPorIdAsync(usuarioId);
 
         if (paciente == null)
         {
-            paciente = new AgendamentoVacinacao.Entity.Entities.Paciente(request.Nome, dataNascimentoParsed);
-            await _pacienteRepository.AdicionarAsync(paciente);
-            await _pacienteRepository.SalvarAlteracoesAsync();
+            paciente = new Paciente(request.Nome, dataNascimentoParsed);
+            // Sincroniza o ID do paciente com o ID do usuário
+            paciente.Id = usuarioId;
+            await _pacienteRepository.AdicionarComIdForcadoAsync(paciente);
         }
 
-        var novoAgendamento = new AgendamentoVacinacao.Entity.Entities.Agendamento(
+        var novoAgendamento = new Agendamento(
             id: 0,
             idPaciente: paciente.Id,
             dataAgendamento: dataAgendamentoParsed,
@@ -68,9 +67,14 @@ public class AgendamentoBusiness : IAgendamentoBusiness
             Status: novoAgendamento.Status
         );
     }
-    public async Task<IEnumerable<AgendamentoResponse>> ObterTodosAsync()
+    public async Task<IEnumerable<AgendamentoResponse>> ObterTodosAsync(int usuarioId, string perfil)
     {
         var agendamentos = await _repository.ObterTodosAsync();
+
+        if (perfil.Equals("Paciente", StringComparison.OrdinalIgnoreCase))
+        {
+            agendamentos = agendamentos.Where(a => a.IdPaciente == usuarioId);
+        }
 
         return agendamentos.Select(a => new AgendamentoResponse(
             Id: a.Id,
@@ -81,13 +85,23 @@ public class AgendamentoBusiness : IAgendamentoBusiness
             Status: a.Status
         ));
     }
-    public async Task<AgendamentoResponse> AtualizarAgendamentoAsync(int id, AtualizarAgendamentoRequest request)
+    public async Task<AgendamentoResponse> AtualizarAgendamentoAsync(int id, AtualizarAgendamentoRequest request, int usuarioId)
     {
         var agendamento = await _repository.ObterPorIdAsync(id);
 
         if (agendamento == null)
         {
             throw new InvalidOperationException("Agendamento não encontrado.");
+        }
+
+        if (agendamento.IdPaciente != usuarioId)
+        {
+            throw new UnauthorizedAccessException("Você não tem permissão para alterar este agendamento.");
+        }
+
+        if (agendamento.Status != StatusAgendamento.Agendado)
+        {
+            throw new InvalidOperationException("Apenas agendamentos com status 'Agendado' podem ser alterados.");
         }
 
         var dataHoraOriginal = agendamento.DataAgendamento.Date.Add(agendamento.HoraAgendamento);
@@ -153,7 +167,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
             Status: agendamento.Status
         );
     }
-    public async Task CancelarAgendamentoAsync(int id)
+    public async Task CancelarAgendamentoAsync(int id, int usuarioId, string perfil)
     {
         var agendamento = await _repository.ObterPorIdAsync(id);
 
@@ -161,6 +175,15 @@ public class AgendamentoBusiness : IAgendamentoBusiness
         {
             throw new InvalidOperationException("Agendamento não encontrado.");
         }
+
+        bool Dono = agendamento.IdPaciente == usuarioId;
+        bool Enfermeiro = perfil.Equals("Enfermeiro", StringComparison.OrdinalIgnoreCase);
+
+        if (!Dono && !Enfermeiro)
+        {
+            throw new UnauthorizedAccessException("Você não tem permissão para cancelar este agendamento.");
+        }
+
         if (agendamento.Status == StatusAgendamento.Cancelado)
         {
             throw new InvalidOperationException("Este agendamento já encontra-se cancelado.");
