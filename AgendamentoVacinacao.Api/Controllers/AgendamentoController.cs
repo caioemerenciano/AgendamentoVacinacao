@@ -4,6 +4,8 @@ using AgendamentoVacinacao.Entity.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+namespace AgendamentoVacinacao.WebApi.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -26,15 +28,8 @@ public class AgendamentoController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        try
-        {
-            var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request);
-            return Created(string.Empty, response);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { mensagem = ex.Message });
-        }
+        var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request);
+        return Created(string.Empty, response);
     }
 
     [HttpGet]
@@ -45,48 +40,34 @@ public class AgendamentoController : ControllerBase
         return Ok(agendamentos);
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> ObterPorId(int id)
+    {
+        var agendamento = await _agendendamentoBusiness.ObterPorIdAsync(id);
+        if (agendamento == null) return NotFound();
+        return Ok(agendamento);
+    }
+
     [HttpPut]
     public async Task<IActionResult> Atualizar(int id, [FromBody] AtualizarAgendamentoRequest request)
     {
-        try
-        {
-            var response = await _agendendamentoBusiness.AtualizarAgendamentoAsync(id, request);
-            return Ok(response);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { mensagem = ex.Message });
-        }
+        var response = await _agendendamentoBusiness.AtualizarAgendamentoAsync(id, request);
+        return Ok(response);
     }
 
     [HttpPatch("{id}/cancelar")]
     [Authorize(Roles = "Paciente")]
     public async Task<IActionResult> Cancelar(int id)
     {
-        try
-        {
-            await _agendendamentoBusiness.CancelarAgendamentoAsync(id);
-
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        await _agendendamentoBusiness.CancelarAgendamentoAsync(id);
+        return NoContent();
     }
+
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> AtualizarStatus(int id, [FromBody] AtualizarStatusRequest request)
     {
-        try
-        {
-            await _agendendamentoBusiness.AtualizarStatusAsync(id, (StatusAgendamento)request.NovoStatus);
-
-            return Ok(new { mensagem = "Status atualizado com sucesso!" });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { mensagem = ex.Message });
-        }
+        await _agendendamentoBusiness.AtualizarStatusAsync(id, (StatusAgendamento)request.NovoStatus);
+        return Ok(new { mensagem = "Status atualizado com sucesso!" });
     }
 
 }

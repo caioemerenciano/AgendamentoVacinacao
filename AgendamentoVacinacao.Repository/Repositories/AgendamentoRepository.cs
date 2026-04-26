@@ -20,7 +20,11 @@ public class AgendamentoRepository : IAgendamentoRepository
     public async Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora)
     {
         var limiteInferior = hora.Subtract(TimeSpan.FromHours(1));
+        if (limiteInferior < TimeSpan.Zero) limiteInferior = TimeSpan.Zero;
+
         var limiteSuperior = hora.Add(TimeSpan.FromHours(1));
+        if (limiteSuperior > new TimeSpan(23, 59, 59)) limiteSuperior = new TimeSpan(23, 59, 59);
+
         return await _context.Agendamentos.CountAsync(a => a.DataAgendamento == data && a.HoraAgendamento > limiteInferior && a.HoraAgendamento < limiteSuperior);
     }
    
@@ -44,7 +48,11 @@ public class AgendamentoRepository : IAgendamentoRepository
     public async Task<bool> ExisteAgendamentoConflitanteAsync(DateTime data, TimeSpan hora, int agendamentoIdIgnorado)
     {
         var limiteInferior = hora.Subtract(TimeSpan.FromHours(1));
+        if (limiteInferior < TimeSpan.Zero) limiteInferior = TimeSpan.Zero;
+
         var limiteSuperior = hora.Add(TimeSpan.FromHours(1));
+        if (limiteSuperior > new TimeSpan(23, 59, 59)) limiteSuperior = new TimeSpan(23, 59, 59);
+
         return await _context.Agendamentos
             .AnyAsync(a => a.DataAgendamento == data
                         && a.HoraAgendamento > limiteInferior

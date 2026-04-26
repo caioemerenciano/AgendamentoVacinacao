@@ -4,6 +4,7 @@ using AgendamentoVacinacao.Entity.DTOs.Response;
 using AgendamentoVacinacao.Entity.Enums;
 using AgendamentoVacinacao.Repository.Interface.IRepositories;
 using AgendamentoVacinacao.Entity.Extensions;
+using AgendamentoVacinacao.Entity.Entities;
 
 
 namespace AgendamentoVacinacao.Business;
@@ -20,12 +21,9 @@ public class AgendamentoBusiness : IAgendamentoBusiness
 
     public async Task<AgendamentoResponse> CriarAgendamentoAsync(CriarAgendamentoRequest request)
     {
-        string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "yyyy-MM-ddTHH:mm:ssZ", "yyyy-MM-ddTHH:mm:ss" };
-
-        var dataAgendamentoParsed = DateTime.ParseExact(request.DataAgendamento, formats, null, System.Globalization.DateTimeStyles.None);
-        var dataNascimentoParsed = DateTime.ParseExact(request.DataNascimento, formats, null, System.Globalization.DateTimeStyles.None);
-
-        var horaAgendamentoParsed = TimeSpan.Parse(request.Horario);
+        var dataAgendamentoParsed = request.DataAgendamento;
+        var dataNascimentoParsed = request.DataNascimento;
+        var horaAgendamentoParsed = request.HoraAgendamento;
 
         int agendamentosNoDia = await _repository.ContarAgendamentosPorDiaAsync(dataAgendamentoParsed);
         if (agendamentosNoDia >= 20)
@@ -43,12 +41,12 @@ public class AgendamentoBusiness : IAgendamentoBusiness
 
         if (paciente == null)
         {
-            paciente = new AgendamentoVacinacao.Entity.Entities.Paciente(request.Nome, dataNascimentoParsed);
+            paciente = new Paciente(request.Nome, dataNascimentoParsed);
             await _pacienteRepository.AdicionarAsync(paciente);
             await _pacienteRepository.SalvarAlteracoesAsync();
         }
 
-        var novoAgendamento = new AgendamentoVacinacao.Entity.Entities.Agendamento(
+        var novoAgendamento = new Agendamento(
             id: 0,
             idPaciente: paciente.Id,
             dataAgendamento: dataAgendamentoParsed,
