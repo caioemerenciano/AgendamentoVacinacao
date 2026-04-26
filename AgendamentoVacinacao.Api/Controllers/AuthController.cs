@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Business.Interface;
+using AgendamentoVacinacao.Business.Interface;
 using AgendamentoVacinacao.Entity.DTOs.Request;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,32 +19,15 @@ public class AuthController : ControllerBase
     [HttpPost("registrar")]
     public async Task<IActionResult> Registrar([FromBody] RegistroRequest request)
     {
-        try
-        {
-            await _authBusiness.RegistrarAsync(request);
-            return StatusCode(201, new { Mensagem = "Usuário cadastrado com sucesso" });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { Erro = ex.Message });
-        }
+        await _authBusiness.RegistrarAsync(request);
+        return StatusCode(201, new { Mensagem = "Usuário cadastrado com sucesso" });
     }
+
     [HttpPost("login")]
-    public async Task<IActionResult>Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        try
-        {
-            var response = await _authBusiness.LoginAsync(request);
-            return Ok(response);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { Erro = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { Erro = "Erro interno", Detalhe = ex.Message });
-        }
+        var response = await _authBusiness.LoginAsync(request);
+        return Ok(response);
     }
     
 }
