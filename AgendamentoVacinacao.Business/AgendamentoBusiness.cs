@@ -28,7 +28,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
         var horaAgendamentoParsed = TimeSpan.Parse(request.Horario);
 
         int agendamentosNoDia = await _repository.ContarAgendamentosPorDiaAsync(dataAgendamentoParsed);
-        if (agendamentosNoDia > 20)
+        if (agendamentosNoDia >= 20)
         {
             throw new InvalidOperationException("A capacidade máxima de 20 agendamentos para este dia foi atingida.");
         }

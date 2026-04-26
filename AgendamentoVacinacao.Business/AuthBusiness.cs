@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Business.Interface;
+using AgendamentoVacinacao.Business.Interface;
 using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.DTOs.Response;
 using AgendamentoVacinacao.Entity.Entities;
@@ -32,7 +32,7 @@ public class AuthBusiness : IAuthBusiness
 
         string senhaCriptografada = BCrypt.Net.BCrypt.HashPassword(request.Senha);
 
-        var novoUsuario = new Usuario(request.Nome, request.Email, senhaCriptografada, request.Perfil);
+        var novoUsuario = new Usuario("", request.Email, senhaCriptografada, AgendamentoVacinacao.Entity.Enums.PerfilUsuario.Paciente);
 
         await _usuarioRepository.AdicionarAsync(novoUsuario);
     }
@@ -48,7 +48,7 @@ public class AuthBusiness : IAuthBusiness
         var refreshToken = GerarRefreshToken();
 
         usuario.RefreshToken = refreshToken;
-        usuario.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+        usuario.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _usuarioRepository.AtualizarAsync(usuario);
 
         return new LoginResponse(token, refreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
@@ -57,14 +57,14 @@ public class AuthBusiness : IAuthBusiness
     {
         var usuario = await _usuarioRepository.ObterPorEmailAsync(request.Email);
 
-        if (usuario == null || usuario.RefreshToken != request.RefreshToken || usuario.RefreshTokenExpiryTime <= DateTime.Now)
+        if (usuario == null || usuario.RefreshToken != request.RefreshToken || usuario.RefreshTokenExpiryTime <= DateTime.UtcNow)
             throw new UnauthorizedAccessException("Refresh Token inválido ou expirado. Faça login novamente.");
 
         var novoToken = GerarTokenJwt(usuario);
         var novoRefreshToken = GerarRefreshToken();
 
         usuario.RefreshToken = novoRefreshToken;
-        usuario.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+        usuario.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _usuarioRepository.AtualizarAsync(usuario);
 
         return new LoginResponse(novoToken, novoRefreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
@@ -86,7 +86,7 @@ public class AuthBusiness : IAuthBusiness
         {
             new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new Claim(ClaimTypes.Email, usuario.Email!),
-            new Claim(ClaimTypes.Name, usuario.Nome!),
+            new Claim(ClaimTypes.Name, usuario.Nome ?? ""),
             new Claim(ClaimTypes.Role, usuario.Perfil.ToString())
         };
 
@@ -94,7 +94,7 @@ public class AuthBusiness : IAuthBusiness
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.Now.AddHours(double.Parse(_configuration["Jwt:ExpireHours"]!)),
+            expires: DateTime.UtcNow.AddHours(double.Parse(_configuration["Jwt:ExpireHours"]!)),
             signingCredentials: creds
         );
 
