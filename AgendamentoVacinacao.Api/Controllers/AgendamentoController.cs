@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-//[Authorize]
+[Authorize]
 public class AgendamentoController : ControllerBase
 {
     private readonly IAgendamentoBusiness _agendendamentoBusiness;
@@ -17,7 +17,7 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpPost]
-    //[Authorize(Roles = "Paciente")]
+    [Authorize(Roles = "Paciente")]
     public async Task<IActionResult> CriarAgendamento([FromBody] CriarAgendamentoRequest request, [FromServices] FluentValidation.IValidator<CriarAgendamentoRequest> validator)
     {
         var validationResult = await validator.ValidateAsync(request);
@@ -38,7 +38,7 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpGet]
-    //[Authorize(Roles = "Enfermeiro")]
+    [Authorize(Roles = "Paciente")]
     public async Task<IActionResult> ObterTodos()
     {
         var agendamentos = await _agendendamentoBusiness.ObterTodosAsync();
@@ -60,7 +60,7 @@ public class AgendamentoController : ControllerBase
     }
 
     [HttpPatch("{id}/cancelar")]
-    //[Authorize(Roles = "Paciente")]
+    [Authorize(Roles = "Paciente")]
     public async Task<IActionResult> Cancelar(int id)
     {
         try
