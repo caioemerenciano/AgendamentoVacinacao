@@ -3,6 +3,7 @@ using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AgendamentoVacinacao.WebApi.Controllers;
 
@@ -28,16 +29,19 @@ public class AgendamentoController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request);
+        var usuarioId = GetUsuarioId();
+        var response = await _agendendamentoBusiness.CriarAgendamentoAsync(request, usuarioId);
         return Created(string.Empty, response);
     }
 
     [HttpGet]
-    [Authorize(Roles = "Paciente")]
-    public async Task<IActionResult> ObterTodos()
+    public async Task<IActionResult> ListarAgendamentos()
     {
-        var agendamentos = await _agendendamentoBusiness.ObterTodosAsync();
-        return Ok(agendamentos);
+        var usuarioId = GetUsuarioId();
+        var perfil = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        
+        var response = await _agendendamentoBusiness.ObterTodosAsync(usuarioId, perfil);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
@@ -48,18 +52,20 @@ public class AgendamentoController : ControllerBase
         return Ok(agendamento);
     }
 
-    [HttpPut]
+    [HttpPut("{id}")]
     public async Task<IActionResult> Atualizar(int id, [FromBody] AtualizarAgendamentoRequest request)
     {
-        var response = await _agendendamentoBusiness.AtualizarAgendamentoAsync(id, request);
+        var usuarioId = GetUsuarioId();
+        var response = await _agendendamentoBusiness.AtualizarAgendamentoAsync(id, request, usuarioId);
         return Ok(response);
     }
 
     [HttpPatch("{id}/cancelar")]
-    [Authorize(Roles = "Paciente")]
     public async Task<IActionResult> Cancelar(int id)
     {
-        await _agendendamentoBusiness.CancelarAgendamentoAsync(id);
+        var usuarioId = GetUsuarioId();
+        var perfil = User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        await _agendendamentoBusiness.CancelarAgendamentoAsync(id, usuarioId, perfil);
         return NoContent();
     }
 
@@ -68,6 +74,24 @@ public class AgendamentoController : ControllerBase
     {
         await _agendendamentoBusiness.AtualizarStatusAsync(id, (StatusAgendamento)request.NovoStatus);
         return Ok(new { mensagem = "Status atualizado com sucesso!" });
+    }
+
+    [HttpPatch("{id}/realizar")]
+    [Authorize(Roles = "Enfermeiro")]
+    public async Task<IActionResult> Realizar(int id)
+    {
+        await _agendendamentoBusiness.AtualizarStatusAsync(id, StatusAgendamento.Realizado);
+        return Ok(new { mensagem = "Agendamento realizado com sucesso!" });
+    }
+
+    private int GetUsuarioId()
+    {
+        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (idClaim == null || !int.TryParse(idClaim.Value, out int id))
+        {
+            throw new UnauthorizedAccessException("Usuário não identificado.");
+        }
+        return id;
     }
 
 }
