@@ -24,7 +24,7 @@ public class PacienteController : ControllerBase
     }
 
     [HttpGet]
-    //[Authorize(Roles = "Enfermeiro")]
+    [Authorize(Roles = "Enfermeiro")]
     public async Task<IActionResult> GetAll()
     {
         var pacientes = await _pacienteBusiness.ObterTodosAsync();
