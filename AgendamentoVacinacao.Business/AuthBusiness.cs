@@ -51,7 +51,7 @@ public class AuthBusiness : IAuthBusiness
         usuario.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _usuarioRepository.AtualizarAsync(usuario);
 
-        return new LoginResponse(token, refreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
+        return new LoginResponse(usuario.Id, token, refreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
     }
     public async Task<LoginResponse> RefreshTokenAsync(RefreshTokenRequest request)
     {
@@ -67,7 +67,7 @@ public class AuthBusiness : IAuthBusiness
         usuario.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _usuarioRepository.AtualizarAsync(usuario);
 
-        return new LoginResponse(novoToken, novoRefreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
+        return new LoginResponse(usuario.Id, novoToken, novoRefreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
     }
     private static string GerarRefreshToken()
     {

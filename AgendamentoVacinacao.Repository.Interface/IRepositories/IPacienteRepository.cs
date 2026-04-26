@@ -10,5 +10,6 @@ public interface IPacienteRepository
     Task<Paciente?> ObterPorNomeEDataNascimentoAsync(string nome, DateTime dataNascimento);
 
     Task AdicionarAsync(Paciente paciente);
+    Task AdicionarComIdForcadoAsync(Paciente paciente);
     Task SalvarAlteracoesAsync();
 }
