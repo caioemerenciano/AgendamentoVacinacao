@@ -34,7 +34,8 @@ public class AuthBusiness : IAuthBusiness
 
         var novoUsuario = new Usuario("", request.Email, senhaCriptografada, AgendamentoVacinacao.Entity.Enums.PerfilUsuario.Paciente);
 
-        await _usuarioRepository.AdicionarAsync(novoUsuario);
+        await _usuarioRepository.AddAsync(novoUsuario);
+        await _usuarioRepository.SaveChangesAsync();
     }
 
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -49,7 +50,8 @@ public class AuthBusiness : IAuthBusiness
 
         usuario.RefreshToken = refreshToken;
         usuario.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-        await _usuarioRepository.AtualizarAsync(usuario);
+        _usuarioRepository.Update(usuario);
+        await _usuarioRepository.SaveChangesAsync();
 
         return new LoginResponse(usuario.Id, token, refreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
     }
@@ -65,7 +67,8 @@ public class AuthBusiness : IAuthBusiness
 
         usuario.RefreshToken = novoRefreshToken;
         usuario.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-        await _usuarioRepository.AtualizarAsync(usuario);
+        _usuarioRepository.Update(usuario);
+        await _usuarioRepository.SaveChangesAsync();
 
         return new LoginResponse(usuario.Id, novoToken, novoRefreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
     }

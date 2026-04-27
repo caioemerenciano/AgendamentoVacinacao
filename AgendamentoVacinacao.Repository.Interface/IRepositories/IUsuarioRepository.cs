@@ -1,10 +1,8 @@
-﻿using AgendamentoVacinacao.Entity.Entities;
+using AgendamentoVacinacao.Entity.Entities;
 
 namespace AgendamentoVacinacao.Repository.Interface.IRepositories;
 
-public interface IUsuarioRepository
+public interface IUsuarioRepository : IBaseRepository<Usuario>
 {
     Task<Usuario?> ObterPorEmailAsync(string email);
-    Task AdicionarAsync(Usuario usuario);
-    Task AtualizarAsync(Usuario usuario);
 }

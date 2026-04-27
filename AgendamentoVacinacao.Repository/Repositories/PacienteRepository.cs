@@ -5,30 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AgendamentoVacinacao.Repository.Repositories;
 
-public class PacienteRepository : IPacienteRepository
+public class PacienteRepository : BaseRepository<Paciente>, IPacienteRepository
 {
-    private readonly AgendamentoVacinacaoContext _context;
-
-    public PacienteRepository(AgendamentoVacinacaoContext context)
+    public PacienteRepository(AgendamentoVacinacaoContext context) : base(context)
     {
-        _context = context;
     }
 
     public async Task<bool> ExistePacienteAsync(string nome, DateTime dataNascimento) =>
          await _context.Pacientes.AnyAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
     
-    public async Task<IEnumerable<Paciente>> ObterTodosAsync() =>
-        await _context.Pacientes.AsNoTracking().ToListAsync();
-
-    public async Task<Paciente?> ObterPorIdAsync(int id) =>
-        await _context.Pacientes.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
-
     public async Task<Paciente?> ObterPorNomeEDataNascimentoAsync(string nome, DateTime dataNascimento) =>
         await _context.Pacientes.FirstOrDefaultAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
-
-
-    public async Task AdicionarAsync(Paciente paciente) =>
-        await _context.Pacientes.AddAsync(paciente);
 
     public async Task AdicionarComIdForcadoAsync(Paciente paciente)
     {
@@ -45,7 +32,4 @@ public class PacienteRepository : IPacienteRepository
             paciente.DataNascimento, 
             paciente.DataCriacao);
     }
-
-    public async Task SalvarAlteracoesAsync() =>
-        await _context.SaveChangesAsync();
 }

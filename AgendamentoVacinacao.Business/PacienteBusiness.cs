@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Business.Interface;
+using AgendamentoVacinacao.Business.Interface;
 using AgendamentoVacinacao.Repository.Interface.IRepositories;
 using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.DTOs.Response;
@@ -28,8 +28,8 @@ public class PacienteBusiness : IPacienteBusiness
             dataNascimento: request.DataNascimento
         );
 
-        await _repository.AdicionarAsync(novoPaciente);
-        await _repository.SalvarAlteracoesAsync();
+        await _repository.AddAsync(novoPaciente);
+        await _repository.SaveChangesAsync();
 
         return new PacienteResponse(
             novoPaciente.Id,
@@ -40,7 +40,7 @@ public class PacienteBusiness : IPacienteBusiness
     public async Task<IEnumerable<PacienteResponse>> ObterTodosAsync()
     {
         
-        var pacientes = await _repository.ObterTodosAsync();
+        var pacientes = await _repository.GetAllAsync();
 
         return pacientes.Select(p => new PacienteResponse(
             Id: p.Id,
@@ -51,7 +51,7 @@ public class PacienteBusiness : IPacienteBusiness
     public async Task<PacienteResponse?> ObterPorIdAsync(int id)
     {
         
-        var paciente = await _repository.ObterPorIdAsync(id);
+        var paciente = await _repository.GetByIdAsync(id);
 
         if (paciente == null)
             return null;

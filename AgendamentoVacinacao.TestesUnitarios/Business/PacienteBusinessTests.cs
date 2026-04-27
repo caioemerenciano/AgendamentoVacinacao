@@ -1,4 +1,4 @@
-﻿using AgendamentoVacinacao.Business; 
+using AgendamentoVacinacao.Business; 
 using AgendamentoVacinacao.Entity.DTOs.Request; 
 using AgendamentoVacinacao.Entity.Entities;
 using AgendamentoVacinacao.Repository.Interface.IRepositories; 
@@ -36,7 +36,8 @@ public class PacienteBusinessTests
 
         Assert.NotNull(resultado);
 
-        _pacienteRepositoryMock.Verify(repo => repo.AdicionarAsync(It.IsAny<Paciente>()), Times.Once);
+        _pacienteRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Paciente>()), Times.Once);
+        _pacienteRepositoryMock.Verify(repo => repo.SaveChangesAsync(), Times.Once);
     }
 
     //Testes de método: ObterTodosAsync (GET)
@@ -50,7 +51,7 @@ public class PacienteBusinessTests
             new Paciente { Id = 2, Nome = "Ana", DataNascimento = new DateTime(1995, 2, 15) }
         };
 
-        _pacienteRepositoryMock.Setup(repo => repo.ObterTodosAsync())
+        _pacienteRepositoryMock.Setup(repo => repo.GetAllAsync())
             .ReturnsAsync(listaSimulada);
 
         var resultado = await _pacienteBusiness.ObterTodosAsync();
@@ -72,7 +73,7 @@ public class PacienteBusinessTests
             DataNascimento = new DateTime(2000, 1, 1)
         };
 
-        _pacienteRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idExistente))
+        _pacienteRepositoryMock.Setup(repo => repo.GetByIdAsync(idExistente))
             .ReturnsAsync(pacienteSimulado);
 
         var resultado = await _pacienteBusiness.ObterPorIdAsync(idExistente);
@@ -87,7 +88,7 @@ public class PacienteBusinessTests
     {
         int idInexistente = 9999;
 
-        _pacienteRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idInexistente))
+        _pacienteRepositoryMock.Setup(repo => repo.GetByIdAsync(idInexistente))
             .ReturnsAsync((Paciente?)null);
 
         var resultado = await _pacienteBusiness.ObterPorIdAsync(idInexistente);
