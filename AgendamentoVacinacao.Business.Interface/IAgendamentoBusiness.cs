@@ -1,5 +1,4 @@
 using AgendamentoVacinacao.Entity.DTOs.Request;
-using AgendamentoVacinacao.Entity.DTOs.Request;
 using AgendamentoVacinacao.Entity.DTOs.Response;
 using AgendamentoVacinacao.Entity.Enums;
 
