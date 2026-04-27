@@ -7,14 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AgendamentoVacinacao.Repository.Repositories;
 
-public class AgendamentoRepository : IAgendamentoRepository
+public class AgendamentoRepository : BaseRepository<Agendamento>, IAgendamentoRepository
 {
-    private readonly AgendamentoVacinacaoContext _context;
-
-    public AgendamentoRepository(AgendamentoVacinacaoContext context)
+    public AgendamentoRepository(AgendamentoVacinacaoContext context) : base(context)
     {
-        _context = context;
     }
+
     public async Task<int> ContarAgendamentosPorDiaAsync(DateTime data) => 
         await _context.Agendamentos.CountAsync(a => a.DataAgendamento.Date == data && a.Status != StatusAgendamento.Cancelado);
     
@@ -32,22 +30,18 @@ public class AgendamentoRepository : IAgendamentoRepository
                                                        && a.Status != StatusAgendamento.Cancelado);
     }
    
-    public async Task<IEnumerable<Agendamento>> ObterTodosAsync() =>
+    // Especialização com Include
+    public override async Task<IEnumerable<Agendamento>> GetAllAsync() =>
         await _context.Agendamentos
             .Include(a => a.Paciente)
             .AsNoTracking()
             .ToListAsync();
 
-    public async Task<Agendamento?> ObterPorIdAsync(int id) =>
+    // Especialização com Include
+    public override async Task<Agendamento?> GetByIdAsync(int id) =>
         await _context.Agendamentos
             .Include(a => a.Paciente)
             .FirstOrDefaultAsync(a => a.Id == id);
-
-    public async Task AtualizarAsync(Agendamento agendamento)
-    {
-        _context.Agendamentos.Update(agendamento);
-        await _context.SaveChangesAsync();
-    }
 
     public async Task<bool> ExisteAgendamentoConflitanteAsync(DateTime data, TimeSpan hora, int agendamentoIdIgnorado)
     {
@@ -64,15 +58,4 @@ public class AgendamentoRepository : IAgendamentoRepository
                         && a.Id != agendamentoIdIgnorado
                         && a.Status != StatusAgendamento.Cancelado);
     }
-
-
-    public async Task AdicionarAsync(Agendamento agendamento)
-    {
-        await _context.Agendamentos.AddAsync(agendamento);
-    }
-
-    public async Task SalvarAlteracoesAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
-}
+}
