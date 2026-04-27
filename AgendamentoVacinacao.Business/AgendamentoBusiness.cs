@@ -37,7 +37,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
             throw new InvalidOperationException("A capacidade máxima de 2 agendamentos simultâneos ou com intervalo menor que 1 hora foi atingida para este slot.");
         }
 
-        var paciente = await _pacienteRepository.ObterPorIdAsync(usuarioId);
+        var paciente = await _pacienteRepository.GetByIdAsync(usuarioId);
 
         if (paciente == null)
         {
@@ -55,8 +55,8 @@ public class AgendamentoBusiness : IAgendamentoBusiness
             status: StatusAgendamento.Agendado
         );
 
-        await _repository.AdicionarAsync(novoAgendamento);
-        await _repository.SalvarAlteracoesAsync();
+        await _repository.AddAsync(novoAgendamento);
+        await _repository.SaveChangesAsync();
 
         return new AgendamentoResponse(
             Id: novoAgendamento.Id,
@@ -69,7 +69,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
     }
     public async Task<IEnumerable<AgendamentoResponse>> ObterTodosAsync(int usuarioId, string perfil)
     {
-        var agendamentos = await _repository.ObterTodosAsync();
+        var agendamentos = await _repository.GetAllAsync();
 
         if (perfil.Equals("Paciente", StringComparison.OrdinalIgnoreCase))
         {
@@ -87,7 +87,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
     }
     public async Task<AgendamentoResponse> AtualizarAgendamentoAsync(int id, AtualizarAgendamentoRequest request, int usuarioId)
     {
-        var agendamento = await _repository.ObterPorIdAsync(id);
+        var agendamento = await _repository.GetByIdAsync(id);
 
         if (agendamento == null)
         {
@@ -138,7 +138,8 @@ public class AgendamentoBusiness : IAgendamentoBusiness
         agendamento.DataAgendamento = request.DataAgendamento;
         agendamento.HoraAgendamento = request.HoraAgendamento;
 
-        await _repository.AtualizarAsync(agendamento);
+        _repository.Update(agendamento);
+        await _repository.SaveChangesAsync();
         
         return new AgendamentoResponse(
             Id: agendamento.Id,
@@ -153,7 +154,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
 
     public async Task<AgendamentoResponse?> ObterPorIdAsync(int id)
     {
-        var agendamento = await _repository.ObterPorIdAsync(id);
+        var agendamento = await _repository.GetByIdAsync(id);
 
         if (agendamento == null)
             return null!;
@@ -169,7 +170,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
     }
     public async Task CancelarAgendamentoAsync(int id, int usuarioId, string perfil)
     {
-        var agendamento = await _repository.ObterPorIdAsync(id);
+        var agendamento = await _repository.GetByIdAsync(id);
 
         if (agendamento == null)
         {
@@ -197,12 +198,13 @@ public class AgendamentoBusiness : IAgendamentoBusiness
 
         agendamento.Cancelar();
 
-        await _repository.AtualizarAsync(agendamento);
+        _repository.Update(agendamento);
+        await _repository.SaveChangesAsync();
     }
 
     public async Task AtualizarStatusAsync(int id, StatusAgendamento novoStatus)
     {
-        var agendamento = await _repository.ObterPorIdAsync(id);
+        var agendamento = await _repository.GetByIdAsync(id);
 
         if (agendamento == null)
         {
@@ -211,6 +213,7 @@ public class AgendamentoBusiness : IAgendamentoBusiness
 
         agendamento.Status = novoStatus;
 
-        await _repository.AtualizarAsync(agendamento);
+        _repository.Update(agendamento);
+        await _repository.SaveChangesAsync();
     }
 }

@@ -25,7 +25,8 @@ public static class DataSeeder
                 perfil: PerfilUsuario.Enfermeiro
             );
 
-            await repository.AdicionarAsync(enfermeiro);
+            await repository.AddAsync(enfermeiro);
+            await repository.SaveChangesAsync();
         }
     }
 }
