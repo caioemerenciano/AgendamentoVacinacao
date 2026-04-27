@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
-    <Folder Include="Fluent\" />
     <Folder Include="Resources\" />
   </ItemGroup>
 

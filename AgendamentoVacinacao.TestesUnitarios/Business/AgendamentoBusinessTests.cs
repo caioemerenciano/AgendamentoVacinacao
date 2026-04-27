@@ -187,11 +187,13 @@ public class AgendamentoBusinessTests
     public async Task CriarAgendamentoAsync_ComDadosValidos_DeveSalvarNoRepositorio()
     {
         var dataAgendamento = DateTime.Now.AddDays(1).Date;
+        var horaAgendamento = new TimeSpan(14, 0, 0);
+        var dataNascimento = new DateTime(1990,5,15);
         var request = new CriarAgendamentoRequest(
             "João Silva",
-            "15/05/1990",
-            dataAgendamento.ToString("dd/MM/yyyy"),
-            "10:00"
+            dataNascimento,
+            dataAgendamento,
+            horaAgendamento
         );
 
         _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(dataAgendamento))
@@ -213,11 +215,13 @@ public class AgendamentoBusinessTests
     public async Task CriarAgendamentoAsync_QuandoHoraEstaOcupadaComIntervaloMenorQueUmaHora_DeveLancarExcecao()
     {
         var dataAgendamento = DateTime.Now.AddDays(1).Date;
+        var horaAgendamento = new TimeSpan(14, 30, 0);
+        var dataNascimento = new DateTime(1990, 1, 1);
         var request = new CriarAgendamentoRequest(
             "Carlos Silva",
-            "1990-01-01",
-            dataAgendamento.ToString("yyyy-MM-dd"),
-            "14:30" 
+            dataNascimento,
+            dataAgendamento,
+            horaAgendamento
         );
 
         _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(dataAgendamento))
