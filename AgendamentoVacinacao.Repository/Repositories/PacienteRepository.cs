@@ -12,10 +12,10 @@ public class PacienteRepository : BaseRepository<Paciente>, IPacienteRepository
     }
 
     public async Task<bool> ExistePacienteAsync(string nome, DateTime dataNascimento) =>
-         await _dbset.Pacientes.AnyAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
+         await _dbSet.AnyAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
     
     public async Task<Paciente?> ObterPorNomeEDataNascimentoAsync(string nome, DateTime dataNascimento) =>
-        await _dbset.Pacientes.FirstOrDefaultAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
+        await _dbSet.FirstOrDefaultAsync(p => p.Nome!.ToLower() == nome.ToLower() && p.DataNascimento == dataNascimento);
 
     public async Task AdicionarComIdForcadoAsync(Paciente paciente)
     {
@@ -24,7 +24,7 @@ public class PacienteRepository : BaseRepository<Paciente>, IPacienteRepository
                   "VALUES ({0}, {1}, {2}, {3}); " +
                   "SET IDENTITY_INSERT tb_paciente OFF;";
         
-        await _dbset.Database.ExecuteSqlRawAsync(sql, 
+        await _context.Database.ExecuteSqlRawAsync(sql, 
             paciente.Id, 
             paciente.Nome ?? string.Empty, 
             paciente.DataNascimento, 

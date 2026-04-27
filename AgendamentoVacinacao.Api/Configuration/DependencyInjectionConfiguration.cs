@@ -18,10 +18,8 @@ public static class DependencyInjectionConfiguration
         services.AddValidatorsFromAssemblyContaining<AgendamentoRequestValidator>();
 
         services.AddScoped<IPacienteRepository, PacienteRepository>();
-        services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
 
- 
-        services.AddScoped<IPacienteBusiness, PacienteBusiness>();
+        services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
         services.AddScoped<IAgendamentoBusiness, AgendamentoBusiness>();
 
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
