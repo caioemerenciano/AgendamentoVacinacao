@@ -14,7 +14,7 @@ public class AgendamentoRepository : BaseRepository<Agendamento>, IAgendamentoRe
     }
 
     public async Task<int> ContarAgendamentosPorDiaAsync(DateTime data) => 
-        await _context.Agendamentos.CountAsync(a => a.DataAgendamento.Date == data && a.Status != StatusAgendamento.Cancelado);
+        await _dbset.Agendamentos.CountAsync(a => a.DataAgendamento.Date == data && a.Status != StatusAgendamento.Cancelado);
     
     public async Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora)
     {
@@ -24,7 +24,7 @@ public class AgendamentoRepository : BaseRepository<Agendamento>, IAgendamentoRe
         var limiteSuperior = hora.Add(TimeSpan.FromHours(1));
         if (limiteSuperior > new TimeSpan(23, 59, 59)) limiteSuperior = new TimeSpan(23, 59, 59);
 
-        return await _context.Agendamentos.CountAsync(a => a.DataAgendamento == data 
+        return await dbset.Agendamentos.CountAsync(a => a.DataAgendamento == data 
                                                        && a.HoraAgendamento > limiteInferior 
                                                        && a.HoraAgendamento < limiteSuperior
                                                        && a.Status != StatusAgendamento.Cancelado);
@@ -32,14 +32,14 @@ public class AgendamentoRepository : BaseRepository<Agendamento>, IAgendamentoRe
    
     // Especialização com Include
     public override async Task<IEnumerable<Agendamento>> GetAllAsync() =>
-        await _context.Agendamentos
+        await _dbset.Agendamentos
             .Include(a => a.Paciente)
             .AsNoTracking()
             .ToListAsync();
 
     // Especialização com Include
     public override async Task<Agendamento?> GetByIdAsync(int id) =>
-        await _context.Agendamentos
+        await _dbset.Agendamentos
             .Include(a => a.Paciente)
             .FirstOrDefaultAsync(a => a.Id == id);
 
@@ -51,11 +51,11 @@ public class AgendamentoRepository : BaseRepository<Agendamento>, IAgendamentoRe
         var limiteSuperior = hora.Add(TimeSpan.FromHours(1));
         if (limiteSuperior > new TimeSpan(23, 59, 59)) limiteSuperior = new TimeSpan(23, 59, 59);
 
-        return await _context.Agendamentos
+        return await _dbset.Agendamentos
             .AnyAsync(a => a.DataAgendamento == data
                         && a.HoraAgendamento > limiteInferior
                         && a.HoraAgendamento < limiteSuperior
                         && a.Id != agendamentoIdIgnorado
                         && a.Status != StatusAgendamento.Cancelado);
     }
-}
+}
