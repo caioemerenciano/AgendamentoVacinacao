@@ -28,12 +28,12 @@ public class AgendamentoBusinessTests
     public async Task CancelarAgendamentosAsync_QuandoAgendamentoNaoExiste_DeveLancarExcecao()
     {
         int idInvalido = 9999;
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idInvalido))
-            .ReturnsAsync((Agendamento?)null);
+        _agendamentoRepositoryMock.Setup(repo => repo.GetByIdAsync(idInvalido))
+            .ReturnsAsync((Agendamento)null!);
 
 
         var excecao = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _agendamentoBusiness.CancelarAgendamentoAsync(idInvalido));
+            () => _agendamentoBusiness.CancelarAgendamentoAsync(idInvalido, 1, "Paciente"));
 
         Assert.Equal("Agendamento não encontrado.", excecao.Message);
     }
@@ -41,19 +41,19 @@ public class AgendamentoBusinessTests
     [Fact]
     public async Task CancelarAgendamentoAsync_QuandoJaEstaCancelado_DeveLancarExcecao()
     {
-
         int idValido = 1;
-        var agendamentoCancelado = new Agendamento
+        var agendamentoSimulado = new Agendamento
         {
+            IdPaciente = 1,
             Status = StatusAgendamento.Cancelado
         };
 
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idValido))
-            .ReturnsAsync(agendamentoCancelado);
+        _agendamentoRepositoryMock.Setup(repo => repo.GetByIdAsync(idValido))
+            .ReturnsAsync(agendamentoSimulado);
 
 
         var excecao = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _agendamentoBusiness.CancelarAgendamentoAsync(idValido));
+            () => _agendamentoBusiness.CancelarAgendamentoAsync(idValido, 1, "Paciente"));
 
         Assert.Equal("Este agendamento já encontra-se cancelado.", excecao.Message);
     }
@@ -64,19 +64,21 @@ public class AgendamentoBusinessTests
         int idValido = 1;
         var agendamentoValido = new Agendamento
         {
+            IdPaciente = 1,
             DataAgendamento = DateTime.Now.AddDays(1),
             HoraAgendamento = new TimeSpan(14, 0, 0),
             Status = StatusAgendamento.Agendado
         };
 
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idValido))
+        _agendamentoRepositoryMock.Setup(repo => repo.GetByIdAsync(idValido))
             .ReturnsAsync(agendamentoValido);
 
-        await _agendamentoBusiness.CancelarAgendamentoAsync(idValido);
+        await _agendamentoBusiness.CancelarAgendamentoAsync(idValido, 1, "Paciente");
 
         Assert.Equal(StatusAgendamento.Cancelado, agendamentoValido.Status);
 
-        _agendamentoRepositoryMock.Verify(repo => repo.AtualizarAsync(agendamentoValido), Times.Once);
+        _agendamentoRepositoryMock.Verify(repo => repo.Update(agendamentoValido), Times.Once);
+        _agendamentoRepositoryMock.Verify(repo => repo.SaveChangesAsync(), Times.Once);
     }
 
 
@@ -95,15 +97,17 @@ public class AgendamentoBusinessTests
         var agendamentoExistente = new Agendamento
         {
             Id = id,
+            IdPaciente = 1,
             DataAgendamento = DateTime.Now.Date,
-            HoraAgendamento = DateTime.Now.AddHours(1).TimeOfDay
+            HoraAgendamento = DateTime.Now.AddHours(1).TimeOfDay,
+            Status = StatusAgendamento.Agendado
         };
 
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(id))
+        _agendamentoRepositoryMock.Setup(repo => repo.GetByIdAsync(id))
             .ReturnsAsync(agendamentoExistente);
 
         var excecao = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _agendamentoBusiness.AtualizarAgendamentoAsync(id, request));
+            () => _agendamentoBusiness.AtualizarAgendamentoAsync(id, request, 1));
 
         Assert.Contains("2 horas de antecedência", excecao.Message);
     }
@@ -124,11 +128,13 @@ public class AgendamentoBusinessTests
         var agendamentoExistente = new Agendamento
         {
             Id = id,
+            IdPaciente = 1,
             DataAgendamento = DateTime.Now.AddDays(5).Date,
-            HoraAgendamento = new TimeSpan(10, 0, 0)
+            HoraAgendamento = new TimeSpan(10, 0, 0),
+            Status = StatusAgendamento.Agendado
         };
 
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(id))
+        _agendamentoRepositoryMock.Setup(repo => repo.GetByIdAsync(id))
             .ReturnsAsync(agendamentoExistente);
 
         _agendamentoRepositoryMock.Setup(repo => repo.ExisteAgendamentoConflitanteAsync(dataFutura, horaFutura, id))
@@ -136,7 +142,7 @@ public class AgendamentoBusinessTests
 
 
         var excecao = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _agendamentoBusiness.AtualizarAgendamentoAsync(id, request));
+            () => _agendamentoBusiness.AtualizarAgendamentoAsync(id, request, 1));
 
         Assert.Contains("Já existe um paciente agendado", excecao.Message);
     }
@@ -157,18 +163,20 @@ public class AgendamentoBusinessTests
         var agendamentoExistente = new Agendamento
         {
             Id = id,
+            IdPaciente = 1,
             DataAgendamento = DateTime.Now.AddDays(5).Date,
-            HoraAgendamento = new TimeSpan(10, 0, 0)
+            HoraAgendamento = new TimeSpan(10, 0, 0),
+            Status = StatusAgendamento.Agendado
         };
 
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(id)).ReturnsAsync(agendamentoExistente);
+        _agendamentoRepositoryMock.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync(agendamentoExistente);
 
         _agendamentoRepositoryMock.Setup(repo => repo.ExisteAgendamentoConflitanteAsync(dataFutura, horaFutura, id)).ReturnsAsync(false);
 
         _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(dataFutura)).ReturnsAsync(20);
 
         var excecao = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _agendamentoBusiness.AtualizarAgendamentoAsync(id, request));
+            () => _agendamentoBusiness.AtualizarAgendamentoAsync(id, request, 1));
 
         Assert.Contains("O limite máximo de 20 vagas", excecao.Message);
     }
@@ -191,38 +199,14 @@ public class AgendamentoBusinessTests
         _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorHorarioAsync(dataAgendamento, It.IsAny<TimeSpan>()))
             .ReturnsAsync(0);
         
-        _pacienteRepositoryMock.Setup(repo => repo.ObterPorNomeEDataNascimentoAsync(request.Nome, It.IsAny<DateTime>()))
+        _pacienteRepositoryMock.Setup(repo => repo.GetByIdAsync(1))
             .ReturnsAsync(new Paciente { Id = 1, Nome = "João Silva" });
 
-        var resultado = await _agendamentoBusiness.CriarAgendamentoAsync(request);
+        var resultado = await _agendamentoBusiness.CriarAgendamentoAsync(request, 1);
 
         Assert.NotNull(resultado);
-        _agendamentoRepositoryMock.Verify(repo => repo.AdicionarAsync(It.IsAny<Agendamento>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task CriarAgendamentoAsync_ComDadosValidos_ISOFormat_DeveSalvarNoRepositorio()
-    {
-        var dataAgendamento = DateTime.Now.AddDays(1).Date;
-        var request = new CriarAgendamentoRequest(
-            "Maria Oliveira",
-            "1985-08-20",
-            dataAgendamento.ToString("yyyy-MM-dd"),
-            "14:00"
-        );
-
-        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(dataAgendamento))
-            .ReturnsAsync(0);
-        _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorHorarioAsync(dataAgendamento, It.IsAny<TimeSpan>()))
-            .ReturnsAsync(0);
-        
-        _pacienteRepositoryMock.Setup(repo => repo.ObterPorNomeEDataNascimentoAsync(request.Nome, It.IsAny<DateTime>()))
-            .ReturnsAsync(new Paciente { Id = 2, Nome = "Maria Oliveira" });
-
-        var resultado = await _agendamentoBusiness.CriarAgendamentoAsync(request);
-
-        Assert.NotNull(resultado);
-        _agendamentoRepositoryMock.Verify(repo => repo.AdicionarAsync(It.IsAny<Agendamento>()), Times.Once);
+        _agendamentoRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Agendamento>()), Times.Once);
+        _agendamentoRepositoryMock.Verify(repo => repo.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -233,16 +217,16 @@ public class AgendamentoBusinessTests
             "Carlos Silva",
             "1990-01-01",
             dataAgendamento.ToString("yyyy-MM-dd"),
-            "14:30" // Tentando agendar 14:30, mas pode estar muito perto de outro
+            "14:30" 
         );
 
         _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorDiaAsync(dataAgendamento))
-            .ReturnsAsync(5); // Um número aceitável pro dia
+            .ReturnsAsync(5); 
         _agendamentoRepositoryMock.Setup(repo => repo.ContarAgendamentosPorHorarioAsync(dataAgendamento, It.IsAny<TimeSpan>()))
-            .ReturnsAsync(2); // Retorna que o overlap é 2 (atingiu a margem de segurança de intervalo simultâneo)
+            .ReturnsAsync(2); 
         
         var excecao = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _agendamentoBusiness.CriarAgendamentoAsync(request));
+            () => _agendamentoBusiness.CriarAgendamentoAsync(request, 1));
 
         Assert.Contains("capacidade máxima", excecao.Message);
         Assert.Contains("intervalo menor que 1 hora", excecao.Message);
@@ -257,10 +241,10 @@ public class AgendamentoBusinessTests
             new Agendamento { Id = 2, DataAgendamento = DateTime.Now.AddDays(1), Paciente = new Paciente { Nome = "João" } }
         };
 
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterTodosAsync())
+        _agendamentoRepositoryMock.Setup(repo => repo.GetAllAsync())
             .ReturnsAsync(listaSimulada);
 
-        var resultado = await _agendamentoBusiness.ObterTodosAsync();
+        var resultado = await _agendamentoBusiness.ObterTodosAsync(1, "Enfermeiro");
 
         Assert.NotNull(resultado);
         Assert.Equal(2, resultado.Count());
@@ -277,7 +261,7 @@ public class AgendamentoBusinessTests
             Paciente = new Paciente { Nome = "João" }
         };
 
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idExistente))
+        _agendamentoRepositoryMock.Setup(repo => repo.GetByIdAsync(idExistente))
             .ReturnsAsync(agendamentoSimulado);
 
         var resultado = await _agendamentoBusiness.ObterPorIdAsync(idExistente);
@@ -290,51 +274,11 @@ public class AgendamentoBusinessTests
     public async Task ObterPorIdAsync_QuandoNaoExiste_DeveRetornarNulo()
     {
         int idInexistente = 99;
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idInexistente))
+        _agendamentoRepositoryMock.Setup(repo => repo.GetByIdAsync(idInexistente))
             .ReturnsAsync((Agendamento?)null);
 
         var resultado = await _agendamentoBusiness.ObterPorIdAsync(idInexistente);
 
         Assert.Null(resultado);
-    }
-
-    // Teste de método: ObterPorIdAsync (GET {id})
-
-    [Fact]
-    public async Task ObterPorIdAsync_QuandoOAgendamentoExiste_DeveRetornarResponseMapeado()
-    {
-        int idExistente = 10;
-        var agendamentoNoBanco = new Agendamento
-        {
-            Id = idExistente,
-            DataAgendamento = DateTime.Now.AddDays(5),
-            HoraAgendamento = new TimeSpan(14, 30, 0),
-            Paciente = new Paciente { Nome = "Usuário Teste" } 
-        };
-
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idExistente))
-            .ReturnsAsync(agendamentoNoBanco);
-
-        var resultado = await _agendamentoBusiness.ObterPorIdAsync(idExistente);
-
-        Assert.NotNull(resultado);
-        Assert.Equal(idExistente, resultado.Id);
-        Assert.Equal("Usuário Teste", resultado.NomePaciente);
-
-        _agendamentoRepositoryMock.Verify(repo => repo.ObterPorIdAsync(idExistente), Times.Once);
-    }
-
-    [Fact]
-    public async Task ObterPorIdAsync_QuandoOAgendamentoNaoExiste_DeveRetornarNulo()
-    {
-        int idInexistente = 999;
-
-        _agendamentoRepositoryMock.Setup(repo => repo.ObterPorIdAsync(idInexistente))
-            .ReturnsAsync((Agendamento?)null);
-
-        var resultado = await _agendamentoBusiness.ObterPorIdAsync(idInexistente);
-
-        Assert.Null(resultado);
-        _agendamentoRepositoryMock.Verify(repo => repo.ObterPorIdAsync(idInexistente), Times.Once);
     }
 }
