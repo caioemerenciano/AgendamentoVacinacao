@@ -20,9 +20,12 @@ builder.Services.AddDependencyInjectionConfiguration();
 
 builder.Services.AddCors(options =>
 {
+    var allowedOrigins = builder.Configuration["CorsSettings:AllowedOrigins"]?
+        .Split(',', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+
     options.AddPolicy("PermitirFrontendLocal", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") 
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
