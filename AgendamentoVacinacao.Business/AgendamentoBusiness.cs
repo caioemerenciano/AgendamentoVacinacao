@@ -21,9 +21,26 @@ public class AgendamentoBusiness : IAgendamentoBusiness
 
     public async Task<AgendamentoResponse> CriarAgendamentoAsync(CriarAgendamentoRequest request, int usuarioId)
     {
-        var dataAgendamentoParsed = request.DataAgendamento;
-        var dataNascimentoParsed = request.DataNascimento;
-        var horaAgendamentoParsed = request.HoraAgendamento;
+        var paciente = await _pacienteRepository.GetByIdAsync(usuarioId);
+
+        if (paciente == null)
+        {
+            // [Tech Lead]: Criação implícita do paciente caso ele ainda não exista no banco (Primeiro acesso)
+            paciente = new Paciente(request.Nome, request.DataNascimento)
+            {
+                Id = usuarioId
+            };
+            await _pacienteRepository.AdicionarComIdForcadoAsync(paciente);
+        }
+
+        // Tech Lead: Sobrescreve Nome e Data de Nascimento com dados reais do banco para garantir integridade.
+        // Se o paciente acabou de ser criado, requestSeguro manterá os dados do payload.
+        // Se o paciente já existia, os dados do banco prevalecem sobre o payload (Segurança).
+        var requestSeguro = request with { Nome = paciente.Nome!, DataNascimento = paciente.DataNascimento };
+        
+        var dataAgendamentoParsed = requestSeguro.DataAgendamento;
+        var dataNascimentoParsed = requestSeguro.DataNascimento;
+        var horaAgendamentoParsed = requestSeguro.HoraAgendamento;
 
         int agendamentosNoDia = await _repository.ContarAgendamentosPorDiaAsync(dataAgendamentoParsed);
         if (agendamentosNoDia >= 20)
@@ -35,16 +52,6 @@ public class AgendamentoBusiness : IAgendamentoBusiness
         if (agendamentosNoHorario >= 2)
         {
             throw new InvalidOperationException("A capacidade máxima de 2 agendamentos simultâneos ou com intervalo menor que 1 hora foi atingida para este slot.");
-        }
-
-        var paciente = await _pacienteRepository.GetByIdAsync(usuarioId);
-
-        if (paciente == null)
-        {
-            paciente = new Paciente(request.Nome, dataNascimentoParsed);
-            // Sincroniza o ID do paciente com o ID do usuário
-            paciente.Id = usuarioId;
-            await _pacienteRepository.AdicionarComIdForcadoAsync(paciente);
         }
 
         var novoAgendamento = new Agendamento(
