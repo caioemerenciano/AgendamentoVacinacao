@@ -16,11 +16,13 @@ public class AuthBusiness : IAuthBusiness
 {
     private readonly IUsuarioRepository _usuarioRepository;
     private readonly IConfiguration _configuration;
+    private readonly IPacienteRepository _pacienteRepository;
 
-    public AuthBusiness(IUsuarioRepository usuarioRepository, IConfiguration configuration)
+    public AuthBusiness(IUsuarioRepository usuarioRepository, IConfiguration configuration, IPacienteRepository pacienteRepository)
     {
         _usuarioRepository = usuarioRepository;
         _configuration = configuration;
+        _pacienteRepository = pacienteRepository;
     }
 
     public async Task RegistrarAsync(RegistroRequest request)
@@ -53,7 +55,11 @@ public class AuthBusiness : IAuthBusiness
         _usuarioRepository.Update(usuario);
         await _usuarioRepository.SaveChangesAsync();
 
-        return new LoginResponse(usuario.Id, token, refreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
+        var paciente = await _pacienteRepository.GetByIdAsync(usuario.Id);
+        var nome = paciente?.Nome ?? usuario.Nome;
+        var dataNascimento = paciente?.DataNascimento;
+
+        return new LoginResponse(usuario.Id, token, refreshToken, nome!, usuario.Email!, usuario.Perfil.ToString(), dataNascimento);
     }
     public async Task<LoginResponse> RefreshTokenAsync(RefreshTokenRequest request)
     {
@@ -70,7 +76,11 @@ public class AuthBusiness : IAuthBusiness
         _usuarioRepository.Update(usuario);
         await _usuarioRepository.SaveChangesAsync();
 
-        return new LoginResponse(usuario.Id, novoToken, novoRefreshToken, usuario.Nome!, usuario.Email!, usuario.Perfil.ToString());
+        var paciente = await _pacienteRepository.GetByIdAsync(usuario.Id);
+        var nome = paciente?.Nome ?? usuario.Nome;
+        var dataNascimento = paciente?.DataNascimento;
+
+        return new LoginResponse(usuario.Id, novoToken, novoRefreshToken, nome!, usuario.Email!, usuario.Perfil.ToString(), dataNascimento);
     }
     private static string GerarRefreshToken()
     {

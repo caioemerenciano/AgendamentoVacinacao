@@ -16,7 +16,7 @@ public class AgendamentoRepository : BaseRepository<Agendamento>, IAgendamentoRe
     public async Task<int> ContarAgendamentosPorDiaAsync(DateTime data) => 
         await _dbSet.CountAsync(a => a.DataAgendamento.Date == data && a.Status != StatusAgendamento.Cancelado);
     
-    public async Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora)
+    public Task<int> ContarAgendamentosPorHorarioAsync(DateTime data, TimeSpan hora)
     {
         var limiteInferior = hora.Subtract(TimeSpan.FromHours(1));
         if (limiteInferior < TimeSpan.Zero) limiteInferior = TimeSpan.Zero;
@@ -24,7 +24,7 @@ public class AgendamentoRepository : BaseRepository<Agendamento>, IAgendamentoRe
         var limiteSuperior = hora.Add(TimeSpan.FromHours(1));
         if (limiteSuperior > new TimeSpan(23, 59, 59)) limiteSuperior = new TimeSpan(23, 59, 59);
 
-        return await _dbSet.CountAsync(a => a.DataAgendamento == data 
+        return _dbSet.CountAsync(a => a.DataAgendamento == data 
                                                        && a.HoraAgendamento > limiteInferior 
                                                        && a.HoraAgendamento < limiteSuperior
                                                        && a.Status != StatusAgendamento.Cancelado);
